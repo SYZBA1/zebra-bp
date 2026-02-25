@@ -12,9 +12,9 @@ const Footer = () => {
           <div className="flex gap-16">
             <div className="flex flex-col gap-3">
               <p className="font-mono text-xs tracking-widest text-primary-foreground/40 uppercase mb-1">Product</p>
-              <a href="#" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">Features</a>
-              <a href="#" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">Marketplace</a>
-              <a href="#" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">Pricing</a>
+              <a href="/#features" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">Features</a>
+              <a href="/#marketplace" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">Marketplace</a>
+              <a href="/studio" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">Studio</a>
             </div>
             <div className="flex flex-col gap-3">
               <p className="font-mono text-xs tracking-widest text-primary-foreground/40 uppercase mb-1">Company</p>

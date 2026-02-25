@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 const CTASection = () => {
+  const navigate = useNavigate();
   return (
     <section className="py-32 bg-secondary">
       <div className="container">
@@ -23,7 +25,7 @@ const CTASection = () => {
             Join entrepreneurs and consultants across Ethiopia who trust ZEBRA 
             to architect professional feasibility studies and business plans.
           </p>
-          <Button size="lg" className="group text-lg px-10 py-6">
+          <Button size="lg" className="group text-lg px-10 py-6" onClick={() => navigate("/studio")}>
             Get Started Free
             <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
           </Button>

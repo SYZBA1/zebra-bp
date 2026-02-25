@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import zebraHero from "@/assets/zebra-hero.jpg";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background image with overlay */}
@@ -63,11 +65,11 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.7 }}
           >
-            <Button size="lg" className="group text-lg px-8 py-6">
+            <Button size="lg" className="group text-lg px-8 py-6" onClick={() => navigate("/studio")}>
               Start Architecting
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6">
+            <Button variant="outline" size="lg" className="text-lg px-8 py-6" onClick={() => document.getElementById("marketplace")?.scrollIntoView({ behavior: "smooth" })}>
               Explore Marketplace
             </Button>
           </motion.div>
