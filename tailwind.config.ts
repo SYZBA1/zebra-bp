@@ -13,6 +13,11 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        display: ['"Space Grotesk"', 'sans-serif'],
+        body: ['"Space Grotesk"', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'monospace'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -57,6 +62,12 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        zebra: {
+          stripe: "hsl(var(--zebra-stripe))",
+          "stripe-alt": "hsl(var(--zebra-stripe-alt))",
+          muted: "hsl(var(--zebra-muted))",
+          highlight: "hsl(var(--zebra-highlight))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,25 +76,22 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "stripe-scroll": {
+          "0%": { backgroundPosition: "0 0" },
+          "100%": { backgroundPosition: "34px 0" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "stripe-scroll": "stripe-scroll 1s linear infinite",
       },
     },
   },
