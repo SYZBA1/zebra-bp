@@ -17,7 +17,9 @@ const Index = () => {
         <div id="process">
           <ProcessSection />
         </div>
-        <CTASection />
+        <div id="marketplace">
+          <CTASection />
+        </div>
       </main>
       <Footer />
     </div>

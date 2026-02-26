@@ -69,7 +69,7 @@ const HeroSection = () => {
               Start Architecting
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6" onClick={() => document.getElementById("marketplace")?.scrollIntoView({ behavior: "smooth" })}>
+            <Button variant="outline" size="lg" className="text-lg px-8 py-6" onClick={() => navigate("/marketplace")}>
               Explore Marketplace
             </Button>
           </motion.div>
