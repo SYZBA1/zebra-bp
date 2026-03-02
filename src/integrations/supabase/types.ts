@@ -46,8 +46,12 @@ export type Database = {
       }
       projects: {
         Row: {
+          contents: Json
           created_at: string
+          custom_titles: Json
+          document_type: string
           id: string
+          language: string
           name: string
           outline: Json
           sector: string
@@ -57,8 +61,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          contents?: Json
           created_at?: string
+          custom_titles?: Json
+          document_type?: string
           id?: string
+          language?: string
           name: string
           outline?: Json
           sector: string
@@ -68,8 +76,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          contents?: Json
           created_at?: string
+          custom_titles?: Json
+          document_type?: string
           id?: string
+          language?: string
           name?: string
           outline?: Json
           sector?: string

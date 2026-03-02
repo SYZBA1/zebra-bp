@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SECTORS } from "@/lib/feasibility-outline";
+import { SECTOR_CATEGORIES } from "@/lib/feasibility-outline";
 import { ArrowRight, Search } from "lucide-react";
 
 interface ProjectSetupProps {
@@ -13,12 +13,18 @@ const ProjectSetup = ({ onComplete, language = "en" }: ProjectSetupProps) => {
   const [name, setName] = useState("");
   const [sector, setSector] = useState("");
   const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const t = (en: string, am: string) => (language === "en" ? en : am);
 
-  const filtered = SECTORS.filter((s) =>
-    s.toLowerCase().includes(search.toLowerCase())
-  );
+  const categoriesToShow = activeCategory
+    ? SECTOR_CATEGORIES.filter((c) => c.label === activeCategory)
+    : SECTOR_CATEGORIES;
+
+  const filteredCategories = categoriesToShow.map((cat) => ({
+    ...cat,
+    sectors: cat.sectors.filter((s) => s.toLowerCase().includes(search.toLowerCase())),
+  })).filter((cat) => cat.sectors.length > 0);
 
   return (
     <div className="flex-1 flex items-center justify-center p-6">
@@ -53,8 +59,28 @@ const ProjectSetup = ({ onComplete, language = "en" }: ProjectSetupProps) => {
 
           <div>
             <label className="text-sm font-medium mb-1.5 block">
-              {t("Sector Domain", "የዘርፍ ዶሜይን")}
+              {t("Sector Type", "የዘርፍ ዓይነት")}
             </label>
+            <div className="flex gap-2 mb-3">
+              <Button
+                variant={activeCategory === null ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveCategory(null)}
+              >
+                {t("All", "ሁሉም")}
+              </Button>
+              {SECTOR_CATEGORIES.map((cat) => (
+                <Button
+                  key={cat.label}
+                  variant={activeCategory === cat.label ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveCategory(cat.label)}
+                >
+                  {language === "am" ? cat.labelAm : cat.label}
+                </Button>
+              ))}
+            </div>
+
             <div className="relative mb-3">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -64,19 +90,29 @@ const ProjectSetup = ({ onComplete, language = "en" }: ProjectSetupProps) => {
                 className="pl-9"
               />
             </div>
-            <div className="grid grid-cols-2 gap-2 max-h-[280px] overflow-y-auto pr-1">
-              {filtered.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSector(s)}
-                  className={`text-left text-sm px-3 py-2.5 border rounded-sm transition-colors ${
-                    sector === s
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border hover:bg-secondary text-foreground"
-                  }`}
-                >
-                  {s}
-                </button>
+
+            <div className="max-h-[300px] overflow-y-auto pr-1 space-y-4">
+              {filteredCategories.map((cat) => (
+                <div key={cat.label}>
+                  <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2">
+                    {language === "am" ? cat.labelAm : cat.label}
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {cat.sectors.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => setSector(s)}
+                        className={`text-left text-sm px-3 py-2.5 border rounded-sm transition-colors ${
+                          sector === s
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border hover:bg-secondary text-foreground"
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>

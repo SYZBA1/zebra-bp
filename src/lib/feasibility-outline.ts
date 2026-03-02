@@ -90,24 +90,45 @@ export const FEASIBILITY_OUTLINE: OutlineNode[] = [
   { id: "annexes", title: "Annexes", titleAm: "አባሪዎች" },
 ];
 
-export const SECTORS = [
-  "Tour and Travel",
-  "Car Rental",
-  "Construction, Engineering & Real Estate",
-  "Education / University, School & Training",
-  "Automotive",
-  "Information Technology",
-  "Advertising, Promotion, Media & Entertainment",
-  "Food & Beverages, Café & Restaurant",
-  "Professional Services",
-  "Agriculture",
-  "Transport",
-  "Hospitality",
-  "Shopping",
-  "Health",
-  "Manufacturing & Industry",
-  "Export",
-  "Foreign Suppliers to Ethiopia",
-  "Government & Organizations",
-  "Associations & NGOs",
+export interface SectorCategory {
+  label: string;
+  labelAm: string;
+  sectors: string[];
+}
+
+export const SECTOR_CATEGORIES: SectorCategory[] = [
+  {
+    label: "Service",
+    labelAm: "አገልግሎት",
+    sectors: [
+      "Tour and Travel",
+      "Car Rental",
+      "Education / University, School & Training",
+      "Information Technology",
+      "Advertising, Promotion, Media & Entertainment",
+      "Professional Services",
+      "Transport",
+      "Hospitality",
+      "Health",
+      "Associations & NGOs",
+      "Government & Organizations",
+    ],
+  },
+  {
+    label: "Product",
+    labelAm: "ምርት",
+    sectors: [
+      "Construction, Engineering & Real Estate",
+      "Automotive",
+      "Food & Beverages, Café & Restaurant",
+      "Agriculture",
+      "Shopping",
+      "Manufacturing & Industry",
+      "Export",
+      "Foreign Suppliers to Ethiopia",
+    ],
+  },
 ];
+
+// Flat list for backward compat
+export const SECTORS = SECTOR_CATEGORIES.flatMap((c) => c.sectors);
