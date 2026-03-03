@@ -15,7 +15,7 @@ const ProcessSection = () => {
           <p className="font-mono text-sm tracking-[0.3em] uppercase text-muted-foreground mb-4">
             Workflow
           </p>
-          <h2 className="text-4xl md:text-6xl font-display font-bold tracking-tight">
+          <h2 className="text-4xl md:text-6xl font-display font-bold tracking-tight text-foreground">
             Idea to document
             <br />
             in four steps.
@@ -26,7 +26,7 @@ const ProcessSection = () => {
           {steps.map((step, i) => (
             <motion.div
               key={step.number}
-              className="border-t-2 border-foreground pt-8 pr-8 pb-8"
+              className="border-t-2 border-primary pt-8 pr-8 pb-8"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -35,7 +35,7 @@ const ProcessSection = () => {
               <span className="font-mono text-5xl font-bold text-muted-foreground/20 block mb-4">
                 {step.number}
               </span>
-              <h3 className="text-xl font-display font-semibold mb-2">
+              <h3 className="text-xl font-display font-semibold mb-2 text-foreground">
                 {step.title}
               </h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
