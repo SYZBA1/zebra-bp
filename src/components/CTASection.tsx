@@ -2,12 +2,19 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import zebraHero from "@/assets/zebra-hero.jpg";
 
 const CTASection = () => {
   const navigate = useNavigate();
   return (
-    <section className="py-32 bg-secondary">
-      <div className="container">
+    <section className="py-32 relative overflow-hidden">
+      {/* Background image */}
+      <div className="absolute inset-0">
+        <img src={zebraHero} alt="" className="w-full h-full object-cover" loading="lazy" />
+        <div className="absolute inset-0 bg-background/85 backdrop-blur-sm" />
+      </div>
+
+      <div className="container relative z-10">
         <motion.div
           className="max-w-3xl mx-auto text-center"
           initial={{ opacity: 0, y: 30 }}
@@ -18,7 +25,7 @@ const CTASection = () => {
           <p className="font-mono text-sm tracking-[0.3em] uppercase text-muted-foreground mb-6">
             Ready to begin?
           </p>
-          <h2 className="text-4xl md:text-6xl font-display font-bold tracking-tight mb-6">
+          <h2 className="text-4xl md:text-6xl font-display font-bold tracking-tight mb-6 text-foreground">
             Transform your ideas into bank-ready documents.
           </h2>
           <p className="text-muted-foreground text-lg mb-10 max-w-lg mx-auto">

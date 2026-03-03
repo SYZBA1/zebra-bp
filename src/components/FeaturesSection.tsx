@@ -60,10 +60,10 @@ const item = {
 
 const FeaturesSection = () => {
   return (
-    <section className="py-32 bg-primary text-primary-foreground">
+    <section className="py-32 bg-card text-card-foreground">
       <div className="container">
         <div className="mb-20">
-          <p className="font-mono text-sm tracking-[0.3em] uppercase text-primary-foreground/50 mb-4">
+          <p className="font-mono text-sm tracking-[0.3em] uppercase text-muted-foreground mb-4">
             Capabilities
           </p>
           <h2 className="text-4xl md:text-6xl font-display font-bold tracking-tight">
@@ -74,7 +74,7 @@ const FeaturesSection = () => {
         </div>
 
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-primary-foreground/10"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border"
           variants={container}
           initial="hidden"
           whileInView="show"
@@ -83,19 +83,19 @@ const FeaturesSection = () => {
           {features.map((feature) => (
             <motion.div
               key={feature.title}
-              className="bg-primary p-10 group hover:bg-primary-foreground/5 transition-colors duration-300"
+              className="bg-card p-10 group hover:bg-secondary transition-colors duration-300"
               variants={item}
             >
               <div className="flex items-center justify-between mb-8">
-                <feature.icon className="h-8 w-8" strokeWidth={1.5} />
-                <span className="font-mono text-xs tracking-widest text-primary-foreground/40">
+                <feature.icon className="h-8 w-8 text-primary" strokeWidth={1.5} />
+                <span className="font-mono text-xs tracking-widest text-muted-foreground">
                   {feature.tag}
                 </span>
               </div>
               <h3 className="text-xl font-display font-semibold mb-3">
                 {feature.title}
               </h3>
-              <p className="text-primary-foreground/60 leading-relaxed text-sm">
+              <p className="text-muted-foreground leading-relaxed text-sm">
                 {feature.description}
               </p>
             </motion.div>

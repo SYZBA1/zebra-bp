@@ -32,7 +32,7 @@ const HeroSection = () => {
           </motion.div>
 
           <motion.h1
-            className="text-6xl md:text-8xl lg:text-9xl font-display font-bold tracking-tighter leading-[0.85] mb-8"
+            className="text-6xl md:text-8xl lg:text-9xl font-display font-bold tracking-tighter leading-[0.85] mb-8 text-foreground"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
@@ -69,7 +69,7 @@ const HeroSection = () => {
               Start Architecting
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6" onClick={() => navigate("/marketplace")}>
+            <Button variant="outline" size="lg" className="text-lg px-8 py-6 border-foreground/20 text-foreground hover:bg-foreground/10" onClick={() => navigate("/marketplace")}>
               Explore Marketplace
             </Button>
           </motion.div>
