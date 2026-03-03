@@ -9,9 +9,10 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { exportPDF, exportDOCX } from "@/lib/export-document";
 import WritingProgress from "./WritingProgress";
+import PrintPreview from "./PrintPreview";
 import {
   ChevronRight, ChevronDown, Sparkles, FileText, ArrowLeft, Plus, Languages,
-  Pencil, Paperclip, Image, FileUp, Loader2, Download,
+  Pencil, Paperclip, Image, FileUp, Loader2, Download, Eye,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -95,7 +96,7 @@ const EditorView = ({ projectName, sector, documentType, onBack, projectId, init
   const [language, setLanguage] = useState<Language>(initialLanguage || "en");
   const [customTitles, setCustomTitles] = useState<Record<string, string>>(initialCustomTitles || {});
   const [isGenerating, setIsGenerating] = useState(false);
-  const [attachments, setAttachments] = useState<Record<string, File[]>>({});
+  const [attachments, setAttachments] = useState<Record<string, { file: File; url: string }[]>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -164,13 +165,21 @@ const EditorView = ({ projectName, sector, documentType, onBack, projectId, init
   const handleFileSelect = (accept: string) => { if (fileInputRef.current) { fileInputRef.current.accept = accept; fileInputRef.current.click(); } };
   const handleFilesChosen = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length > 0) { setAttachments((prev) => ({ ...prev, [activeNodeId]: [...(prev[activeNodeId] || []), ...files] })); toast({ title: `${files.length} file(s) attached` }); }
+    if (files.length > 0) {
+      const newAttachments = files.map((file) => ({ file, url: URL.createObjectURL(file) }));
+      setAttachments((prev) => ({ ...prev, [activeNodeId]: [...(prev[activeNodeId] || []), ...newAttachments] }));
+      toast({ title: `${files.length} file(s) attached` });
+    }
     e.target.value = "";
   };
-  const removeAttachment = (idx: number) => setAttachments((prev) => ({ ...prev, [activeNodeId]: (prev[activeNodeId] || []).filter((_, i) => i !== idx) }));
+  const removeAttachment = (idx: number) => {
+    const att = attachments[activeNodeId]?.[idx];
+    if (att) URL.revokeObjectURL(att.url);
+    setAttachments((prev) => ({ ...prev, [activeNodeId]: (prev[activeNodeId] || []).filter((_, i) => i !== idx) }));
+  };
 
-  // Strip markdown for display
-  const cleanContent = (text: string) => text.replace(/\*\*\*/g, "").replace(/\*\*/g, "").replace(/\*/g, "").replace(/^#{1,6}\s+/gm, "");
+  const isImage = (name: string) => /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name);
+  const isPDF = (name: string) => /\.pdf$/i.test(name);
 
   const docLabel = documentType === "business-plan" ? "Business Plan" : "Feasibility Study";
 
@@ -214,6 +223,21 @@ const EditorView = ({ projectName, sector, documentType, onBack, projectId, init
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Print Preview */}
+            <PrintPreview
+              projectName={projectName}
+              sector={sector}
+              documentType={documentType}
+              outline={outline}
+              contents={contents}
+              customTitles={customTitles}
+              language={language}
+            >
+              <Button variant="outline" size="icon" className="h-9 w-9" title="Print Preview">
+                <Eye className="h-4 w-4" />
+              </Button>
+            </PrintPreview>
+
             {/* Export */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -248,22 +272,41 @@ const EditorView = ({ projectName, sector, documentType, onBack, projectId, init
         </div>
 
         <div className="flex-1 p-6 overflow-y-auto">
+          {/* Attachments Display */}
           {currentAttachments.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {currentAttachments.map((file, idx) => (
-                <span key={idx} className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground text-xs px-2.5 py-1 rounded-sm">
-                  <Paperclip className="h-3 w-3" />{file.name}
-                  <button onClick={() => removeAttachment(idx)} className="ml-1 hover:text-destructive">×</button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Preview cleaned content */}
-          {currentContent && (
-            <div className="mb-4 p-4 bg-card rounded border border-border">
-              <p className="text-xs font-mono uppercase text-muted-foreground mb-2">{language === "en" ? "Preview" : "ቅድመ-እይታ"}</p>
-              <div className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">{cleanContent(currentContent)}</div>
+            <div className="mb-4 space-y-3">
+              <p className="text-xs font-mono uppercase text-muted-foreground tracking-wider">
+                {language === "en" ? "Attachments" : "አባሪዎች"} ({currentAttachments.length})
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {currentAttachments.map((att, idx) => (
+                  <div key={idx} className="border border-border rounded-sm overflow-hidden group relative">
+                    {isImage(att.file.name) ? (
+                      <img src={att.url} alt={att.file.name} className="w-full h-32 object-cover" />
+                    ) : isPDF(att.file.name) ? (
+                      <div className="h-32 flex items-center justify-center bg-secondary">
+                        <div className="text-center">
+                          <FileUp className="h-8 w-8 text-primary mx-auto mb-1" />
+                          <p className="text-[10px] font-mono text-muted-foreground">PDF</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="h-32 flex items-center justify-center bg-secondary">
+                        <div className="text-center">
+                          <Paperclip className="h-8 w-8 text-muted-foreground mx-auto mb-1" />
+                          <p className="text-[10px] font-mono text-muted-foreground">{att.file.name.split(".").pop()?.toUpperCase()}</p>
+                        </div>
+                      </div>
+                    )}
+                    <div className="p-2 flex items-center justify-between">
+                      <p className="text-[10px] font-mono text-muted-foreground truncate flex-1">{att.file.name}</p>
+                      <button onClick={() => removeAttachment(idx)} className="text-muted-foreground hover:text-destructive ml-1">
+                        <span className="text-xs">×</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

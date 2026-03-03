@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Languages, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ProjectSetup from "@/components/studio/ProjectSetup";
 import TemplateBrowser from "@/components/studio/TemplateBrowser";
 import EditorView from "@/components/studio/EditorView";
@@ -23,11 +23,13 @@ interface SavedProject {
   contents: Record<string, string>;
   custom_titles: Record<string, string>;
   language: string;
+  service_description: string;
   updated_at: string;
 }
 
 const Studio = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { displayName, userId } = useProfile();
   const { toast } = useToast();
   const [view, setView] = useState<StudioView>("home");
@@ -42,6 +44,7 @@ const Studio = () => {
   const [initialContents, setInitialContents] = useState<Record<string, string>>({});
   const [initialCustomTitles, setInitialCustomTitles] = useState<Record<string, string>>({});
   const [initialLanguage, setInitialLanguage] = useState<"en" | "am">("en");
+  const [showFromFeasibility, setShowFromFeasibility] = useState(false);
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
@@ -65,7 +68,19 @@ const Studio = () => {
     load();
   }, [userId]);
 
-  const handleScratchSetupComplete = async (name: string, sec: string) => {
+  // Handle navigation from marketplace with template
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.resumeProjectId && savedProjects.length > 0) {
+      const project = savedProjects.find((p) => p.id === state.resumeProjectId);
+      if (project) {
+        handleResumeProject(project);
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [savedProjects, location.state]);
+
+  const handleScratchSetupComplete = async (name: string, sec: string, serviceDesc: string) => {
     setProjectName(name);
     setSector(sec);
     setInitialContents({});
@@ -75,7 +90,8 @@ const Studio = () => {
       const { data, error } = await supabase.from("projects").insert({
         user_id: userId, name, sector: sec, type: "scratch",
         document_type: documentType, language, contents: {} as any, custom_titles: {} as any,
-      }).select("id").single();
+        service_description: serviceDesc,
+      } as any).select("id").single();
       if (data) setCurrentProjectId(data.id);
       if (error) toast({ title: "Error", description: "Failed to create project", variant: "destructive" });
     }
@@ -98,6 +114,25 @@ const Studio = () => {
     setInitialLanguage((project.language || "en") as "en" | "am");
     setView("editor");
   };
+
+  const handleFromFeasibility = (project: SavedProject) => {
+    // Create a business plan based on completed feasibility study
+    setProjectName(`${project.name} — Business Plan`);
+    setSector(project.sector);
+    setDocumentType("business-plan");
+    setInitialContents({
+      cover: project.contents?.cover || "",
+      "1": project.contents?.["1"] || "",
+    });
+    setInitialCustomTitles({});
+    setShowFromFeasibility(false);
+    setView("setup");
+  };
+
+  // Get completed feasibility studies (more than 5 sections filled)
+  const completedFeasibilities = savedProjects.filter(
+    (p) => p.document_type === "feasibility" && Object.keys(p.contents || {}).length > 5
+  );
 
   const t = (en: string, am: string) => (language === "en" ? en : am);
 
@@ -165,6 +200,28 @@ const Studio = () => {
               </div>
             )}
 
+            {/* From Feasibility Study Modal */}
+            {showFromFeasibility && (
+              <div className="mb-10 border border-primary/30 bg-primary/5 p-6 rounded-sm">
+                <h3 className="text-lg font-display font-bold mb-2">{t("Select Completed Feasibility Study", "የተጠናቀቀ ጥናት ይምረጡ")}</h3>
+                <p className="text-sm text-muted-foreground mb-4">{t("Create a business plan based on your completed feasibility study.", "ከተጠናቀቀ ጥናት ላይ የንግድ ዕቅድ ይፍጠሩ።")}</p>
+                {completedFeasibilities.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">{t("No completed feasibility studies found. Complete a feasibility study first.", "የተጠናቀቀ ጥናት አልተገኘም።")}</p>
+                ) : (
+                  <div className="space-y-2">
+                    {completedFeasibilities.map((p) => (
+                      <button key={p.id} onClick={() => handleFromFeasibility(p)}
+                        className="w-full text-left border border-border rounded-sm p-3 hover:bg-secondary transition-colors">
+                        <p className="font-display font-bold text-sm">{p.name}</p>
+                        <p className="text-[10px] font-mono text-muted-foreground">{p.sector} · {Object.keys(p.contents || {}).length} sections</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <Button variant="outline" size="sm" className="mt-4" onClick={() => setShowFromFeasibility(false)}>Cancel</Button>
+              </div>
+            )}
+
             <div className="text-center">
               <h2 className="text-3xl font-display font-bold tracking-tight mb-4">
                 {t("Start a New Project", "አዲስ ፕሮጀክት ይጀምሩ")}
@@ -192,7 +249,7 @@ const Studio = () => {
                   <Button onClick={() => { setDocumentType("business-plan"); setView("setup"); }}>
                     {t("Start Business Plan", "የንግድ ዕቅድ ይጀምሩ")}
                   </Button>
-                  <Button variant="outline" disabled title={t("Complete a feasibility study first", "በመጀመሪያ የተግባራዊነት ጥናት ያጠናቅቁ")}>
+                  <Button variant="outline" onClick={() => setShowFromFeasibility(true)}>
                     {t("From Feasibility Study", "ከተግባራዊነት ጥናት")}
                   </Button>
                 </div>
