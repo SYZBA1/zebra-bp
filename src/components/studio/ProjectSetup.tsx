@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { SECTOR_CATEGORIES } from "@/lib/feasibility-outline";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight, Search, Paperclip, X } from "lucide-react";
 
 interface ProjectSetupProps {
-  onComplete: (name: string, sector: string) => void;
+  onComplete: (name: string, sector: string, serviceDescription: string) => void;
   language?: "en" | "am";
 }
 
@@ -14,6 +15,9 @@ const ProjectSetup = ({ onComplete, language = "en" }: ProjectSetupProps) => {
   const [sector, setSector] = useState("");
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [serviceDescription, setServiceDescription] = useState("");
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const t = (en: string, am: string) => (language === "en" ? en : am);
 
@@ -26,8 +30,15 @@ const ProjectSetup = ({ onComplete, language = "en" }: ProjectSetupProps) => {
     sectors: cat.sectors.filter((s) => s.toLowerCase().includes(search.toLowerCase())),
   })).filter((cat) => cat.sectors.length > 0);
 
+  const handleFileAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setAttachedFiles((prev) => [...prev, ...files]);
+    e.target.value = "";
+  };
+
   return (
     <div className="flex-1 flex items-center justify-center p-6">
+      <input ref={fileInputRef} type="file" multiple accept=".pdf,.doc,.docx,image/*" className="hidden" onChange={handleFileAttach} />
       <div className="w-full max-w-lg space-y-8">
         <div>
           <p className="font-mono text-xs tracking-[0.3em] uppercase text-muted-foreground mb-2">
@@ -37,10 +48,7 @@ const ProjectSetup = ({ onComplete, language = "en" }: ProjectSetupProps) => {
             {t("Project Setup", "ፕሮጀክት ማዋቀር")}
           </h2>
           <p className="text-muted-foreground">
-            {t(
-              "Define your project name and select the sector domain.",
-              "የፕሮጀክት ስም ይግለጹ እና የዘርፍ ዶሜይን ይምረጡ።"
-            )}
+            {t("Define your project and select the sector domain.", "የፕሮጀክት ስም ይግለጹ እና የዘርፍ ዶሜይን ይምረጡ።")}
           </p>
         </div>
 
@@ -59,14 +67,42 @@ const ProjectSetup = ({ onComplete, language = "en" }: ProjectSetupProps) => {
 
           <div>
             <label className="text-sm font-medium mb-1.5 block">
+              {t("Service / Product Description", "የአገልግሎት / ምርት መግለጫ")}
+            </label>
+            <Textarea
+              placeholder={t("Briefly describe your service or product, target market, and unique value proposition...", "አገልግሎትዎን ወይም ምርትዎን፣ ዒላማ ገበያዎን እና ልዩ ዋጋዎን በአጭሩ ይግለጹ...")}
+              value={serviceDescription}
+              onChange={(e) => setServiceDescription(e.target.value)}
+              className="min-h-[100px]"
+            />
+            <div className="flex items-center gap-2 mt-2">
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => fileInputRef.current?.click()}>
+                <Paperclip className="h-3 w-3" /> {t("Attach Files", "ፋይሎችን ያያይዙ")}
+              </Button>
+              {attachedFiles.length > 0 && (
+                <span className="text-xs text-muted-foreground">{attachedFiles.length} file(s)</span>
+              )}
+            </div>
+            {attachedFiles.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {attachedFiles.map((f, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground text-[10px] px-2 py-1 rounded-sm">
+                    {f.name}
+                    <button onClick={() => setAttachedFiles((prev) => prev.filter((_, idx) => idx !== i))} className="hover:text-destructive">
+                      <X className="h-2.5 w-2.5" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-1.5 block">
               {t("Sector Type", "የዘርፍ ዓይነት")}
             </label>
             <div className="flex gap-2 mb-3">
-              <Button
-                variant={activeCategory === null ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveCategory(null)}
-              >
+              <Button variant={activeCategory === null ? "default" : "outline"} size="sm" onClick={() => setActiveCategory(null)}>
                 {t("All", "ሁሉም")}
               </Button>
               {SECTOR_CATEGORIES.map((cat) => (
@@ -91,7 +127,7 @@ const ProjectSetup = ({ onComplete, language = "en" }: ProjectSetupProps) => {
               />
             </div>
 
-            <div className="max-h-[300px] overflow-y-auto pr-1 space-y-4">
+            <div className="max-h-[250px] overflow-y-auto pr-1 space-y-4">
               {filteredCategories.map((cat) => (
                 <div key={cat.label}>
                   <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2">
@@ -121,7 +157,7 @@ const ProjectSetup = ({ onComplete, language = "en" }: ProjectSetupProps) => {
         <Button
           className="w-full h-12 group"
           disabled={!name.trim() || !sector}
-          onClick={() => onComplete(name.trim(), sector)}
+          onClick={() => onComplete(name.trim(), sector, serviceDescription)}
         >
           {t("Continue to Editor", "ወደ አርታኢ ይቀጥሉ")}
           <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

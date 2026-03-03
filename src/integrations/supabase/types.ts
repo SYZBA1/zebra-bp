@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      marketplace_templates: {
+        Row: {
+          category: string
+          contents: Json
+          cover_image_url: string | null
+          created_at: string
+          custom_titles: Json
+          description: string
+          document_type: string
+          id: string
+          is_premium: boolean
+          price_cents: number | null
+          sector: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          contents?: Json
+          cover_image_url?: string | null
+          created_at?: string
+          custom_titles?: Json
+          description: string
+          document_type?: string
+          id?: string
+          is_premium?: boolean
+          price_cents?: number | null
+          sector: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          contents?: Json
+          cover_image_url?: string | null
+          created_at?: string
+          custom_titles?: Json
+          description?: string
+          document_type?: string
+          id?: string
+          is_premium?: boolean
+          price_cents?: number | null
+          sector?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string | null
+          metadata: Json | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          metadata?: Json | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          metadata?: Json | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -21,6 +102,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          phone_number: string | null
           updated_at: string
           user_id: string
         }
@@ -30,6 +112,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          phone_number?: string | null
           updated_at?: string
           user_id: string
         }
@@ -39,6 +122,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          phone_number?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -55,6 +139,7 @@ export type Database = {
           name: string
           outline: Json
           sector: string
+          service_description: string | null
           template_id: string | null
           type: string
           updated_at: string
@@ -70,6 +155,7 @@ export type Database = {
           name: string
           outline?: Json
           sector: string
+          service_description?: string | null
           template_id?: string | null
           type?: string
           updated_at?: string
@@ -85,6 +171,7 @@ export type Database = {
           name?: string
           outline?: Json
           sector?: string
+          service_description?: string | null
           template_id?: string | null
           type?: string
           updated_at?: string
