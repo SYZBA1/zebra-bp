@@ -12,7 +12,7 @@ import { getStoredTheme, setStoredTheme, type Theme } from "@/lib/theme";
 import zebraLogoLight from "@/assets/zebra-logo-light.png";
 
 type StudioView = "home" | "setup" | "templates" | "editor";
-type DocumentType = "feasibility" | "business-plan";
+type DocumentType = "feasibility" | "business-plan" | "strategic-business" | "org-structure" | "performance-tracking" | "business-health";
 
 interface SavedProject {
   id: string;
