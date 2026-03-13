@@ -12,7 +12,7 @@ import { getStoredTheme, setStoredTheme, type Theme } from "@/lib/theme";
 import zebraLogoLight from "@/assets/zebra-logo-light.png";
 
 type StudioView = "home" | "setup" | "templates" | "editor";
-type DocumentType = "feasibility" | "business-plan";
+type DocumentType = "feasibility" | "business-plan" | "strategic-business" | "org-structure" | "performance-tracking" | "business-health";
 
 interface SavedProject {
   id: string;
@@ -173,32 +173,82 @@ const Studio = () => {
       {view === "home" && (
         <main className="flex-1 flex items-center justify-center p-6">
           <div className="w-full max-w-2xl">
-            {/* Saved projects */}
-            {!loadingProjects && savedProjects.length > 0 && (
-              <div className="mb-10">
-                <h3 className="text-lg font-display font-bold mb-4">
-                  {t("Resume a Project", "ፕሮጀክት ይቀጥሉ")}
-                </h3>
-                <div className="space-y-2">
-                  {savedProjects.map((p) => (
-                    <button
-                      key={p.id}
-                      onClick={() => handleResumeProject(p)}
-                      className="w-full text-left border border-border rounded-sm p-4 hover:bg-secondary transition-colors flex items-center justify-between"
-                    >
-                      <div>
-                        <p className="font-display font-bold">{p.name}</p>
-                        <p className="text-xs font-mono text-muted-foreground">{p.sector} · {p.document_type || "feasibility"}</p>
-                      </div>
-                      <p className="text-xs text-muted-foreground font-mono">
-                        {new Date(p.updated_at).toLocaleDateString()}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-                <div className="border-t border-border my-6" />
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-display font-bold tracking-tight mb-4">
+                {t("Start a New Project", "አዲስ ፕሮጀክት ይጀምሩ")}
+              </h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+                <button onClick={() => { setDocumentType("feasibility"); setView("setup"); }}
+                  className="border border-border rounded-lg p-5 hover:bg-secondary transition-colors group text-left">
+                  <p className="font-display font-bold text-base mb-1 group-hover:text-primary transition-colors">
+                    {t("Feasibility Study", "የተግባራዊነት ጥናት")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("Analyze market viability, financial projections, and operational feasibility.", "የገበያ ተገቢነት፣ የፋይናንስ ትንበያ እና ተግባራዊነት ይተንትኑ።")}
+                  </p>
+                </button>
+
+                <button onClick={() => { setDocumentType("business-plan"); setView("setup"); }}
+                  className="border border-border rounded-lg p-5 hover:bg-secondary transition-colors group text-left">
+                  <p className="font-display font-bold text-base mb-1 group-hover:text-primary transition-colors">
+                    {t("Business Plan", "የንግድ ዕቅድ")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("Company description, market strategy, financial plan, and growth roadmap.", "የድርጅት መግለጫ፣ የገበያ ስትራቴጂ፣ የፋይናንስ ዕቅድ እና ዕድገት።")}
+                  </p>
+                </button>
+
+                <button onClick={() => { setDocumentType("strategic-business"); setView("setup"); }}
+                  className="border border-border rounded-lg p-5 hover:bg-secondary transition-colors group text-left">
+                  <p className="font-display font-bold text-base mb-1 group-hover:text-primary transition-colors">
+                    {t("Strategic Business Development", "ስትራቴጂካዊ የንግድ ልማት")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("Growth engine, B2B partnerships, CAC targets, and phased market entry.", "የእድገት ሞተር፣ B2B አጋርነት፣ CAC ዒላማዎች እና ደረጃ በደረጃ የገበያ ግቢ።")}
+                  </p>
+                </button>
+
+                <button onClick={() => { setDocumentType("org-structure"); setView("setup"); }}
+                  className="border border-border rounded-lg p-5 hover:bg-secondary transition-colors group text-left">
+                  <p className="font-display font-bold text-base mb-1 group-hover:text-primary transition-colors">
+                    {t("Organizational Structure", "ድርጅታዊ አወቃቀር")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("Hierarchy, reporting lines, key roles, and recruitment timeline.", "ተዋረድ፣ የሪፖርት መስመሮች፣ ቁልፍ ሚናዎች እና የቅጥር ሰሌዳ።")}
+                  </p>
+                </button>
+
+                <button onClick={() => { setDocumentType("performance-tracking"); setView("setup"); }}
+                  className="border border-border rounded-lg p-5 hover:bg-secondary transition-colors group text-left">
+                  <p className="font-display font-bold text-base mb-1 group-hover:text-primary transition-colors">
+                    {t("Performance Tracking", "የአፈጻጸም ክትትል")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("KPIs, project delivery timelines, client retention, and pipeline velocity.", "KPIዎች፣ የፕሮጀክት ጊዜ ሰሌዳ፣ ደንበኛ ማቆየት እና የቧንቧ ፍጥነት።")}
+                  </p>
+                </button>
+
+                <button onClick={() => { setDocumentType("business-health"); setView("setup"); }}
+                  className="border border-border rounded-lg p-5 hover:bg-secondary transition-colors group text-left">
+                  <p className="font-display font-bold text-base mb-1 group-hover:text-primary transition-colors">
+                    {t("Business Health Analysis", "የንግድ ጤና ትንተና")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("Cash flow, profit margins, risk matrix, and health dashboard alerts.", "የገንዘብ ፍሰት፣ የትርፍ ህዳግ፣ ስጋት ማትሪክስ እና ማንቂያዎች።")}
+                  </p>
+                </button>
               </div>
-            )}
+
+              <div className="flex gap-4 justify-center mt-6">
+                <Button variant="outline" onClick={() => { setDocumentType("feasibility"); setView("templates"); }}>
+                  {t("Browse Templates", "ቅድመ-ቅርጾችን ያስሱ")}
+                </Button>
+                <Button variant="outline" onClick={() => setShowFromFeasibility(true)}>
+                  {t("From Feasibility Study", "ከተግባራዊነት ጥናት")}
+                </Button>
+              </div>
+            </div>
 
             {/* From Feasibility Study Modal */}
             {showFromFeasibility && (
@@ -222,39 +272,32 @@ const Studio = () => {
               </div>
             )}
 
-            <div className="text-center">
-              <h2 className="text-3xl font-display font-bold tracking-tight mb-4">
-                {t("Start a New Project", "አዲስ ፕሮጀክት ይጀምሩ")}
-              </h2>
-
-              <div className="space-y-4">
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                  {t("Feasibility Study", "የተግባራዊነት ጥናት")}
-                </p>
-                <div className="flex gap-4 justify-center">
-                  <Button onClick={() => { setDocumentType("feasibility"); setView("setup"); }}>
-                    {t("Start from Scratch", "ከባዶ ይጀምሩ")}
-                  </Button>
-                  <Button variant="outline" onClick={() => { setDocumentType("feasibility"); setView("templates"); }}>
-                    {t("Browse Templates", "ቅድመ-ቅርጾችን ያስሱ")}
-                  </Button>
-                </div>
-
-                <div className="border-t border-border my-6" />
-
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                  {t("Business Plan", "የንግድ ዕቅድ")}
-                </p>
-                <div className="flex gap-4 justify-center">
-                  <Button onClick={() => { setDocumentType("business-plan"); setView("setup"); }}>
-                    {t("Start Business Plan", "የንግድ ዕቅድ ይጀምሩ")}
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowFromFeasibility(true)}>
-                    {t("From Feasibility Study", "ከተግባራዊነት ጥናት")}
-                  </Button>
+            {/* Resume a Project - below all tools */}
+            {!loadingProjects && savedProjects.length > 0 && (
+              <div className="mt-8">
+                <div className="border-t border-border mb-6" />
+                <h3 className="text-lg font-display font-bold mb-4">
+                  {t("Resume a Project", "ፕሮጀክት ይቀጥሉ")}
+                </h3>
+                <div className="space-y-2">
+                  {savedProjects.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => handleResumeProject(p)}
+                      className="w-full text-left border border-border rounded-sm p-4 hover:bg-secondary transition-colors flex items-center justify-between"
+                    >
+                      <div>
+                        <p className="font-display font-bold">{p.name}</p>
+                        <p className="text-xs font-mono text-muted-foreground">{p.sector} · {p.document_type || "feasibility"}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground font-mono">
+                        {new Date(p.updated_at).toLocaleDateString()}
+                      </p>
+                    </button>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </main>
       )}

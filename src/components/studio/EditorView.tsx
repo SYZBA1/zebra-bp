@@ -5,6 +5,10 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FEASIBILITY_OUTLINE, type OutlineNode } from "@/lib/feasibility-outline";
 import { BUSINESS_PLAN_OUTLINE } from "@/lib/business-plan-outline";
+import { STRATEGIC_BUSINESS_OUTLINE } from "@/lib/strategic-business-outline";
+import { ORG_STRUCTURE_OUTLINE } from "@/lib/org-structure-outline";
+import { PERFORMANCE_TRACKING_OUTLINE } from "@/lib/performance-tracking-outline";
+import { BUSINESS_HEALTH_OUTLINE } from "@/lib/business-health-outline";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { exportPDF, exportDOCX } from "@/lib/export-document";
@@ -19,7 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 type Language = "en" | "am";
-type DocumentType = "feasibility" | "business-plan";
+type DocumentType = "feasibility" | "business-plan" | "strategic-business" | "org-structure" | "performance-tracking" | "business-health";
 
 interface EditorViewProps {
   projectName: string;
@@ -101,7 +105,15 @@ const EditorView = ({ projectName, sector, documentType, onBack, projectId, init
   const { toast } = useToast();
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const outline = documentType === "business-plan" ? BUSINESS_PLAN_OUTLINE : FEASIBILITY_OUTLINE;
+  const outlineMap: Record<DocumentType, OutlineNode[]> = {
+    "feasibility": FEASIBILITY_OUTLINE,
+    "business-plan": BUSINESS_PLAN_OUTLINE,
+    "strategic-business": STRATEGIC_BUSINESS_OUTLINE,
+    "org-structure": ORG_STRUCTURE_OUTLINE,
+    "performance-tracking": PERFORMANCE_TRACKING_OUTLINE,
+    "business-health": BUSINESS_HEALTH_OUTLINE,
+  };
+  const outline = outlineMap[documentType] || FEASIBILITY_OUTLINE;
   const allNodes = flattenNodes(outline);
   const activeNode = allNodes.find((n) => n.id === activeNodeId);
   const currentContent = contents[activeNodeId] || "";
