@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 type Language = "en" | "am";
-type DocumentType = "feasibility" | "business-plan";
+type DocumentType = "feasibility" | "business-plan" | "strategic-business" | "org-structure" | "performance-tracking" | "business-health";
 
 interface EditorViewProps {
   projectName: string;
