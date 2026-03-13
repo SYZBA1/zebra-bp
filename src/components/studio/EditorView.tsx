@@ -105,7 +105,15 @@ const EditorView = ({ projectName, sector, documentType, onBack, projectId, init
   const { toast } = useToast();
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const outline = documentType === "business-plan" ? BUSINESS_PLAN_OUTLINE : FEASIBILITY_OUTLINE;
+  const outlineMap: Record<DocumentType, OutlineNode[]> = {
+    "feasibility": FEASIBILITY_OUTLINE,
+    "business-plan": BUSINESS_PLAN_OUTLINE,
+    "strategic-business": STRATEGIC_BUSINESS_OUTLINE,
+    "org-structure": ORG_STRUCTURE_OUTLINE,
+    "performance-tracking": PERFORMANCE_TRACKING_OUTLINE,
+    "business-health": BUSINESS_HEALTH_OUTLINE,
+  };
+  const outline = outlineMap[documentType] || FEASIBILITY_OUTLINE;
   const allNodes = flattenNodes(outline);
   const activeNode = allNodes.find((n) => n.id === activeNodeId);
   const currentContent = contents[activeNodeId] || "";
