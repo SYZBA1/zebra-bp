@@ -107,11 +107,20 @@ export const SECTOR_CATEGORIES: SectorCategory[] = [
       "Information Technology",
       "Advertising, Promotion, Media & Entertainment",
       "Professional Services",
-      "Transport",
-      "Hospitality",
-      "Health",
+      "Transport & Logistics",
+      "Hospitality & Hotels",
+      "Health & Medical Services",
       "Associations & NGOs",
-      "Government & Organizations",
+      "Government & Public Organizations",
+      "Financial Services & Banking",
+      "Insurance Services",
+      "Legal & Consulting Services",
+      "Event Management & Catering",
+      "Cleaning & Facility Management",
+      "Beauty, Salon & Spa",
+      "Fitness & Wellness",
+      "E-commerce & Digital Services",
+      "Telecommunications",
     ],
   },
   {
@@ -119,16 +128,58 @@ export const SECTOR_CATEGORIES: SectorCategory[] = [
     labelAm: "ምርት",
     sectors: [
       "Construction, Engineering & Real Estate",
-      "Automotive",
+      "Automotive & Vehicles",
       "Food & Beverages, Café & Restaurant",
-      "Agriculture",
-      "Shopping",
+      "Agriculture & Farming",
+      "Retail & Shopping",
       "Manufacturing & Industry",
-      "Export",
+      "Export Trade",
       "Foreign Suppliers to Ethiopia",
+      "Textile & Garment",
+      "Furniture & Interior Design",
+      "Pharmaceuticals & Medical Devices",
+      "Printing & Publishing",
+      "Packaging & Plastics",
+      "Leather & Leather Products",
+      "Electronics & Electrical Equipment",
+      "Building Materials & Hardware",
+      "Chemical & Industrial Products",
+    ],
+  },
+  {
+    label: "Technology",
+    labelAm: "ቴክኖሎጂ",
+    sectors: [
+      "Software Development & SaaS",
+      "FinTech & Digital Payments",
+      "AgriTech & Smart Farming",
+      "HealthTech & Telemedicine",
+      "EdTech & Online Learning",
+      "AI & Data Analytics",
+      "Cybersecurity",
+    ],
+  },
+  {
+    label: "Energy & Resources",
+    labelAm: "ኃይል እና ሀብቶች",
+    sectors: [
+      "Renewable Energy (Solar, Wind, Hydro)",
+      "Mining & Mineral Processing",
+      "Water Supply & Irrigation",
+      "Waste Management & Recycling",
+      "Oil, Gas & Petroleum",
+      "Environmental Consulting",
     ],
   },
 ];
 
 // Flat list for backward compat
 export const SECTORS = SECTOR_CATEGORIES.flatMap((c) => c.sectors);
+
+export type BusinessScale = "sme" | "medium" | "industrial";
+
+export const BUSINESS_SCALES: { value: BusinessScale; label: string; labelAm: string; description: string }[] = [
+  { value: "sme", label: "SME", labelAm: "ጥቃቅንና አነስተኛ", description: "Small to Medium Enterprise (1–50 employees)" },
+  { value: "medium", label: "Medium-Sized", labelAm: "መካከለኛ", description: "Medium-Sized Enterprise (51–250 employees)" },
+  { value: "industrial", label: "Industrial Standard", labelAm: "ኢንዱስትሪያል", description: "Industrial / Large Enterprise (250+ employees)" },
+];
