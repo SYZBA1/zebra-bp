@@ -6,11 +6,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { getStoredTheme, setStoredTheme } from "@/lib/theme";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import zebraLogoLight from "@/assets/zebra-logo-light.png";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const Navbar = () => {
-  const [open, setOpen] = useState(false);
   const [session, setSession] = useState<any>(null);
   const [theme, setTheme] = useState(getStoredTheme());
+  const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,21 +29,32 @@ const Navbar = () => {
   const handleStudio = () => navigate(session ? "/studio" : "/auth");
   const toggleTheme = () => { const next = theme === "dark" ? "light" : "dark"; setTheme(next); setStoredTheme(next); };
 
+  const navLinks = [
+    { label: "Features", href: "/#features" },
+    { label: "Process", href: "/#process" },
+    { label: "Marketplace", onClick: () => navigate("/marketplace") },
+    { label: "About", onClick: () => navigate("/about") },
+    { label: "Blog", onClick: () => navigate("/blog") },
+    { label: "Contact", onClick: () => navigate("/contact") },
+  ];
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="container flex items-center justify-between h-16">
+      <div className="container flex items-center justify-between h-14 sm:h-16">
         <a href="/" className="flex items-center gap-2">
-          <img src={zebraLogoLight} alt="Zebra" className="h-6 object-contain" />
-          <span className="font-display text-xl font-bold tracking-tighter">ZEBRA</span>
+          <img src={zebraLogoLight} alt="Zebra" className="h-5 sm:h-6 object-contain" />
+          <span className="font-display text-lg sm:text-xl font-bold tracking-tighter">ZEBRA</span>
         </a>
 
-        <div className="hidden md:flex items-center gap-8">
-          <a href="/#features" className="text-sm font-mono text-muted-foreground hover:text-foreground transition-colors">Features</a>
-          <a href="/#process" className="text-sm font-mono text-muted-foreground hover:text-foreground transition-colors">Process</a>
-          <button onClick={() => navigate("/marketplace")} className="text-sm font-mono text-muted-foreground hover:text-foreground transition-colors">Marketplace</button>
-          <button onClick={() => navigate("/about")} className="text-sm font-mono text-muted-foreground hover:text-foreground transition-colors">About</button>
-          <button onClick={() => navigate("/blog")} className="text-sm font-mono text-muted-foreground hover:text-foreground transition-colors">Blog</button>
-          <button onClick={() => navigate("/contact")} className="text-sm font-mono text-muted-foreground hover:text-foreground transition-colors">Contact</button>
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-6 lg:gap-8">
+          {navLinks.map((link) => (
+            link.href ? (
+              <a key={link.label} href={link.href} className="text-sm font-mono text-muted-foreground hover:text-foreground transition-colors">{link.label}</a>
+            ) : (
+              <button key={link.label} onClick={link.onClick} className="text-sm font-mono text-muted-foreground hover:text-foreground transition-colors">{link.label}</button>
+            )
+          ))}
           <button onClick={toggleTheme} className="p-1.5 rounded hover:bg-secondary transition-colors">
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
@@ -50,25 +68,44 @@ const Navbar = () => {
           <Button size="sm" onClick={handleStudio}>Enter Studio</Button>
         </div>
 
-        <button className="md:hidden" onClick={() => setOpen(!open)}>
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
-      </div>
-
-      {open && (
-        <div className="md:hidden border-t border-border bg-background p-6 flex flex-col gap-4">
-          <a href="/#features" className="text-sm font-mono" onClick={() => setOpen(false)}>Features</a>
-          <a href="/#process" className="text-sm font-mono" onClick={() => setOpen(false)}>Process</a>
-          <button className="text-sm font-mono text-left" onClick={() => { setOpen(false); navigate("/marketplace"); }}>Marketplace</button>
-          <button className="text-sm font-mono text-left" onClick={() => { setOpen(false); navigate("/about"); }}>About</button>
-          <button className="text-sm font-mono text-left" onClick={() => { setOpen(false); navigate("/blog"); }}>Blog</button>
-          <button className="text-sm font-mono text-left" onClick={() => { setOpen(false); navigate("/contact"); }}>Contact</button>
-          <button className="text-sm font-mono text-left flex items-center gap-1" onClick={toggleTheme}>
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />} Toggle Theme
-          </button>
-          <Button size="sm" className="w-full" onClick={() => { setOpen(false); handleStudio(); }}>Enter Studio</Button>
+        {/* Mobile hamburger → Sheet sliding drawer */}
+        <div className="md:hidden flex items-center gap-2">
+          {session && (
+            <ProfileSidebar>
+              <button className="p-1.5 rounded-full border border-border hover:bg-secondary transition-colors">
+                <User className="h-4 w-4" />
+              </button>
+            </ProfileSidebar>
+          )}
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild>
+              <button className="p-1.5">
+                <Menu className="h-5 w-5" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[280px] p-0">
+              <SheetHeader className="px-6 pt-6 pb-4 border-b border-border">
+                <SheetTitle className="font-display text-lg font-bold tracking-tighter text-left">Menu</SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col p-6 gap-1">
+                {navLinks.map((link) => (
+                  link.href ? (
+                    <a key={link.label} href={link.href} className="text-sm font-mono py-3 px-3 rounded-sm hover:bg-secondary transition-colors" onClick={() => setMobileOpen(false)}>{link.label}</a>
+                  ) : (
+                    <button key={link.label} className="text-sm font-mono text-left py-3 px-3 rounded-sm hover:bg-secondary transition-colors" onClick={() => { setMobileOpen(false); link.onClick?.(); }}>{link.label}</button>
+                  )
+                ))}
+                <button className="text-sm font-mono text-left py-3 px-3 rounded-sm hover:bg-secondary transition-colors flex items-center gap-2" onClick={toggleTheme}>
+                  {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />} Toggle Theme
+                </button>
+                <div className="pt-4 border-t border-border mt-2">
+                  <Button className="w-full" onClick={() => { setMobileOpen(false); handleStudio(); }}>Enter Studio</Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
-      )}
+      </div>
     </nav>
   );
 };
