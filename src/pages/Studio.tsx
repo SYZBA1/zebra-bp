@@ -10,13 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getStoredTheme, setStoredTheme, type Theme } from "@/lib/theme";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -73,6 +66,8 @@ const Studio = () => {
   const [initialLanguage, setInitialLanguage] = useState<"en" | "am">("en");
   const [showFromFeasibility, setShowFromFeasibility] = useState(false);
   const [introChoice, setIntroChoice] = useState<"outline" | "list" | null>(null);
+  // Store setup data temporarily before format choice
+  const [pendingSetup, setPendingSetup] = useState<{ name: string; sector: string; serviceDesc: string; loc?: string; scale?: string } | null>(null);
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
@@ -108,15 +103,28 @@ const Studio = () => {
     }
   }, [savedProjects, location.state]);
 
-  const handleScratchSetupComplete = async (name: string, sec: string, serviceDesc: string, loc?: string, scale?: string) => {
+  // Setup complete → go to format choice (intro)
+  const handleScratchSetupComplete = (name: string, sec: string, serviceDesc: string, loc?: string, scale?: string) => {
+    setPendingSetup({ name, sector: sec, serviceDesc, loc, scale });
+    setIntroChoice(null);
+    setView("intro");
+  };
+
+  // After format choice, create project and go to editor
+  const handleIntroConfirm = async () => {
+    if (!pendingSetup) return;
+    const { name, sector: sec, serviceDesc } = pendingSetup;
     setProjectName(name);
     setSector(sec);
-    setInitialContents({});
+
+    // If "list" (free writing), start with empty outline
+    const startContents = introChoice === "list" ? {} : {};
+    setInitialContents(startContents);
     setInitialCustomTitles({});
 
     if (userId) {
       const { data, error } = await supabase.from("projects").insert({
-        user_id: userId, name, sector: sec, type: "scratch",
+        user_id: userId, name, sector: sec, type: introChoice === "list" ? "free" : "outline",
         document_type: documentType, language, contents: {} as any, custom_titles: {} as any,
         service_description: serviceDesc,
       } as any).select("id").single();
@@ -140,6 +148,7 @@ const Studio = () => {
     setInitialContents(project.contents || {});
     setInitialCustomTitles(project.custom_titles || {});
     setInitialLanguage((project.language || "en") as "en" | "am");
+    setIntroChoice(project.type === "free" ? "list" : "outline");
     setView("editor");
   };
 
@@ -170,10 +179,7 @@ const Studio = () => {
   const handleToolSelect = (type: DocumentType) => {
     setDocumentType(type);
     setIntroChoice(null);
-    setView("intro");
-  };
-
-  const handleIntroContinue = () => {
+    setPendingSetup(null);
     setView("setup");
   };
 
@@ -185,6 +191,7 @@ const Studio = () => {
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
             if (view === "home") navigate("/");
+            else if (view === "intro") setView("setup");
             else setView("home");
           }}>
             <ArrowLeft className="h-4 w-4" />
@@ -206,7 +213,7 @@ const Studio = () => {
             {language === "en" ? "EN" : "አማ"}
           </button>
           {view === "home" && (
-            <Button size="sm" className="hidden sm:inline-flex" onClick={() => { setDocumentType("feasibility"); setView("intro"); }}>
+            <Button size="sm" className="hidden sm:inline-flex" onClick={() => { setDocumentType("feasibility"); setView("setup"); }}>
               {t("New Project", "አዲስ ፕሮጀክት")}
             </Button>
           )}
@@ -219,9 +226,9 @@ const Studio = () => {
           <div className="w-full max-w-2xl mx-auto">
             <div className="text-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-display font-bold tracking-tight mb-2">
-                {t("Start a New Project", "አዲስ ፕሮጀክት ይጀምሩ")}
+                {t("Business Propositions", "የንግድ ሃሳቦች")}
               </h2>
-              <p className="text-sm text-muted-foreground">{t("Choose a document tool to begin", "ለመጀመር የሰነድ መሣሪያ ይምረጡ")}</p>
+              <p className="text-sm text-muted-foreground">{t("Launch a fresh initiative — choose a document tool to begin.", "አዲስ ተነሳሽነት ይጀምሩ — ለመጀመር የሰነድ መሣሪያ ይምረጡ።")}</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
@@ -327,7 +334,7 @@ const Studio = () => {
         </main>
       )}
 
-      {/* INTRO VIEW - Document structure choice */}
+      {/* INTRO VIEW - Document format choice (after setup) */}
       {view === "intro" && (
         <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
           <div className="w-full max-w-md space-y-6 text-center">
@@ -336,7 +343,7 @@ const Studio = () => {
                 {docTypeLabel(documentType)}
               </p>
               <h2 className="text-2xl sm:text-3xl font-display font-bold tracking-tight mb-2">
-                {t("How would you like to structure your document?", "ሰነድዎን እንዴት ማዋቀር ይፈልጋሉ?")}
+                {t("Which format do you prefer?", "የትኛውን ቅርጸት ይመርጣሉ?")}
               </h2>
               <p className="text-sm text-muted-foreground">
                 {t("Choose a starting structure for your new project.", "ለአዲሱ ፕሮጀክትዎ የመነሻ አወቃቀር ይምረጡ።")}
@@ -352,7 +359,7 @@ const Studio = () => {
               >
                 <ClipboardList className="h-8 w-8 text-primary mb-3" />
                 <p className="font-display font-bold text-base mb-1">{t("Outline View", "ንድፍ እይታ")}</p>
-                <p className="text-xs text-muted-foreground">{t("Follow a structured outline with numbered sections and subsections.", "በቁጥር የተደረደሩ ክፍሎች እና ንዑስ ክፍሎች ይከተሉ።")}</p>
+                <p className="text-xs text-muted-foreground">{t("Follow a structured outline with cover page, numbered sections and subsections.", "በሽፋን ገጽ፣ በቁጥር የተደረደሩ ክፍሎች እና ንዑስ ክፍሎች ይከተሉ።")}</p>
               </button>
               <button
                 onClick={() => { setIntroChoice("list"); }}
@@ -362,15 +369,15 @@ const Studio = () => {
               >
                 <FileText className="h-8 w-8 text-primary mb-3" />
                 <p className="font-display font-bold text-base mb-1">{t("Free Writing", "ነፃ ጽሑፍ")}</p>
-                <p className="text-xs text-muted-foreground">{t("Write freely with a simple list of sections. Add, remove, or reorder as needed.", "በቀላል ዝርዝር ክፍሎች በነፃ ይጻፉ።")}</p>
+                <p className="text-xs text-muted-foreground">{t("Start with an empty workspace. Add, remove, or reorder sections as needed.", "ባዶ የሥራ ቦታ ይጀምሩ። ክፍሎችን እንደፈለጉ ያክሉ፣ ያስወግዱ ወይም ያስተካክሉ።")}</p>
               </button>
             </div>
 
-            <Button className="w-full h-11" disabled={!introChoice} onClick={handleIntroContinue}>
-              {t("Continue", "ይቀጥሉ")}
+            <Button className="w-full h-11" disabled={!introChoice} onClick={handleIntroConfirm}>
+              {t("Start Writing", "መጻፍ ይጀምሩ")}
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setView("home")}>
-              {t("← Back", "← ተመለስ")}
+            <Button variant="ghost" size="sm" onClick={() => setView("setup")}>
+              {t("← Back to Setup", "← ወደ ማዋቀር ተመለስ")}
             </Button>
           </div>
         </main>
@@ -394,6 +401,7 @@ const Studio = () => {
           initialContents={initialContents}
           initialCustomTitles={initialCustomTitles}
           initialLanguage={initialLanguage}
+          useEmptyOutline={introChoice === "list"}
         />
       )}
     </div>
