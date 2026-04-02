@@ -16,13 +16,13 @@ import WritingProgress from "./WritingProgress";
 import PrintPreview from "./PrintPreview";
 import {
   ChevronRight, ChevronDown, Sparkles, FileText, ArrowLeft, Plus, Languages,
-  Pencil, Paperclip, Image, FileUp, Loader2, Download, Eye, Menu, X,
+  Pencil, Paperclip, Image, FileUp, Loader2, Download, Eye, Menu, X, Trash2,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Sheet, SheetContent, SheetTrigger,
+  Sheet, SheetContent,
 } from "@/components/ui/sheet";
 
 type Language = "en" | "am";
@@ -37,6 +37,7 @@ interface EditorViewProps {
   initialContents?: Record<string, string>;
   initialCustomTitles?: Record<string, string>;
   initialLanguage?: Language;
+  useEmptyOutline?: boolean;
 }
 
 const flattenNodes = (nodes: OutlineNode[]): OutlineNode[] => {
@@ -49,10 +50,11 @@ const flattenNodes = (nodes: OutlineNode[]): OutlineNode[] => {
 };
 
 const NodeItem = ({
-  node, depth, activeId, onSelect, language, customTitles, onEditTitle,
+  node, depth, activeId, onSelect, language, customTitles, onEditTitle, onDelete,
 }: {
   node: OutlineNode; depth: number; activeId: string; onSelect: (id: string) => void;
   language: Language; customTitles: Record<string, string>; onEditTitle: (id: string, title: string) => void;
+  onDelete?: (id: string) => void;
 }) => {
   const [expanded, setExpanded] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -83,21 +85,29 @@ const NodeItem = ({
           ) : <span className="truncate text-xs">{displayTitle}</span>}
         </button>
         {!editing && (
-          <button onClick={handleStartEdit} className={`opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ${isActive ? "text-primary-foreground" : "text-muted-foreground"}`}>
-            <Pencil className="h-3 w-3" />
-          </button>
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+            <button onClick={handleStartEdit} className={isActive ? "text-primary-foreground" : "text-muted-foreground"} title="Edit">
+              <Pencil className="h-3 w-3" />
+            </button>
+            {onDelete && (
+              <button onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}
+                className={`${isActive ? "text-primary-foreground hover:text-destructive" : "text-muted-foreground hover:text-destructive"}`} title="Delete">
+                <Trash2 className="h-3 w-3" />
+              </button>
+            )}
+          </div>
         )}
       </div>
       {hasChildren && expanded && (
         <div>{node.children!.map((child) => (
-          <NodeItem key={child.id} node={child} depth={depth + 1} activeId={activeId} onSelect={onSelect} language={language} customTitles={customTitles} onEditTitle={onEditTitle} />
+          <NodeItem key={child.id} node={child} depth={depth + 1} activeId={activeId} onSelect={onSelect} language={language} customTitles={customTitles} onEditTitle={onEditTitle} onDelete={onDelete} />
         ))}</div>
       )}
     </div>
   );
 };
 
-const EditorView = ({ projectName, sector, documentType, onBack, projectId, initialContents, initialCustomTitles, initialLanguage }: EditorViewProps) => {
+const EditorView = ({ projectName, sector, documentType, onBack, projectId, initialContents, initialCustomTitles, initialLanguage, useEmptyOutline }: EditorViewProps) => {
   const [activeNodeId, setActiveNodeId] = useState("cover");
   const [contents, setContents] = useState<Record<string, string>>(initialContents || {});
   const [language, setLanguage] = useState<Language>(initialLanguage || "en");
@@ -117,7 +127,17 @@ const EditorView = ({ projectName, sector, documentType, onBack, projectId, init
     "performance-tracking": PERFORMANCE_TRACKING_OUTLINE,
     "business-health": BUSINESS_HEALTH_OUTLINE,
   };
-  const outline = outlineMap[documentType] || FEASIBILITY_OUTLINE;
+
+  const baseOutline = outlineMap[documentType] || FEASIBILITY_OUTLINE;
+
+  // If free writing mode, start with just a cover page; otherwise use full outline
+  const [outline, setOutline] = useState<OutlineNode[]>(() => {
+    if (useEmptyOutline) {
+      return [{ id: "cover", title: "Cover Page Details", titleAm: "የሽፋን ገጽ ዝርዝሮች" }];
+    }
+    return baseOutline;
+  });
+
   const allNodes = flattenNodes(outline);
   const activeNode = allNodes.find((n) => n.id === activeNodeId);
   const currentContent = contents[activeNodeId] || "";
@@ -126,6 +146,36 @@ const EditorView = ({ projectName, sector, documentType, onBack, projectId, init
   const activeTitle = customTitles[activeNodeId] || (language === "am" && activeNode?.titleAm ? activeNode.titleAm : activeNode?.title) || "Select a section";
 
   const handleEditTitle = (id: string, title: string) => setCustomTitles((prev) => ({ ...prev, [id]: title }));
+
+  // Add a new outline section
+  const handleAddSection = () => {
+    const nextId = `s${outline.length + 1}`;
+    const newNode: OutlineNode = { id: nextId, title: `New Section ${outline.length}`, titleAm: `አዲስ ክፍል ${outline.length}` };
+    setOutline((prev) => [...prev, newNode]);
+    setActiveNodeId(nextId);
+    toast({ title: language === "en" ? "Section added" : "ክፍል ተጨምሯል" });
+  };
+
+  // Delete an outline section
+  const handleDeleteSection = (id: string) => {
+    if (outline.length <= 1) {
+      toast({ title: language === "en" ? "Cannot delete" : "መሰረዝ አይቻልም", description: language === "en" ? "At least one section is required." : "ቢያንስ አንድ ክፍል ያስፈልጋል።", variant: "destructive" });
+      return;
+    }
+    const removeNode = (nodes: OutlineNode[]): OutlineNode[] => {
+      return nodes
+        .filter((n) => n.id !== id)
+        .map((n) => n.children ? { ...n, children: removeNode(n.children) } : n);
+    };
+    setOutline((prev) => removeNode(prev));
+    // Clean up content
+    setContents((prev) => { const next = { ...prev }; delete next[id]; return next; });
+    setCustomTitles((prev) => { const next = { ...prev }; delete next[id]; return next; });
+    if (activeNodeId === id) {
+      setActiveNodeId(outline[0]?.id || "cover");
+    }
+    toast({ title: language === "en" ? "Section deleted" : "ክፍል ተሰርዟል" });
+  };
 
   const saveToDb = useCallback(async (c: Record<string, string>, ct: Record<string, string>) => {
     if (!projectId) return;
@@ -227,10 +277,18 @@ const EditorView = ({ projectName, sector, documentType, onBack, projectId, init
           {outline.map((node) => (
             <NodeItem key={node.id} node={node} depth={0} activeId={activeNodeId}
               onSelect={(id) => { setActiveNodeId(id); setSidebarOpen(false); }}
-              language={language} customTitles={customTitles} onEditTitle={handleEditTitle} />
+              language={language} customTitles={customTitles} onEditTitle={handleEditTitle}
+              onDelete={handleDeleteSection} />
           ))}
         </div>
       </ScrollArea>
+
+      {/* Add new section button */}
+      <div className="border-t border-sidebar-border p-2">
+        <Button variant="ghost" size="sm" className="w-full gap-1.5 text-xs" onClick={handleAddSection}>
+          <Plus className="h-3.5 w-3.5" /> {language === "en" ? "Add Section" : "ክፍል ያክሉ"}
+        </Button>
+      </div>
     </>
   );
 
@@ -254,7 +312,6 @@ const EditorView = ({ projectName, sector, documentType, onBack, projectId, init
       <div className="flex-1 flex flex-col min-w-0">
         <div className="border-b border-border px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            {/* Mobile sidebar toggle */}
             <Button variant="ghost" size="icon" className="h-8 w-8 md:hidden shrink-0" onClick={() => setSidebarOpen(true)}>
               <Menu className="h-4 w-4" />
             </Button>
