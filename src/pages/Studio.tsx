@@ -412,6 +412,16 @@ const Studio = () => {
           useEmptyOutline={introChoice === "list"}
         />
       )}
+
+      {view === "health" && (
+        <HealthDiagnostic
+          businessName={projectName}
+          sector={sector}
+          language={language}
+          projectId={currentProjectId}
+          onBack={() => setView("home")}
+        />
+      )}
     </div>
   );
 };
