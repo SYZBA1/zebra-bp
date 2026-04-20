@@ -104,9 +104,16 @@ const Studio = () => {
     }
   }, [savedProjects, location.state]);
 
-  // Setup complete → go to format choice (intro)
+  // Setup complete → for Business Health, jump straight to the diagnostic wizard.
+  // Otherwise go to format choice (intro).
   const handleScratchSetupComplete = (name: string, sec: string, serviceDesc: string, loc?: string, scale?: string) => {
     setPendingSetup({ name, sector: sec, serviceDesc, loc, scale });
+    if (documentType === "business-health") {
+      setProjectName(name);
+      setSector(sec);
+      setView("health");
+      return;
+    }
     setIntroChoice(null);
     setView("intro");
   };
