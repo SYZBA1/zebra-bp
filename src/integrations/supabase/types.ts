@@ -14,6 +14,181 @@ export type Database = {
   }
   public: {
     Tables: {
+      health_assessments: {
+        Row: {
+          answers: Json
+          business_name: string
+          created_at: string
+          gaps: Json
+          id: string
+          language: string
+          overall_score: number | null
+          pillar_scores: Json
+          project_id: string | null
+          rating: string | null
+          sector: string
+          solutions: Json
+          status: string
+          summary: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          business_name: string
+          created_at?: string
+          gaps?: Json
+          id?: string
+          language?: string
+          overall_score?: number | null
+          pillar_scores?: Json
+          project_id?: string | null
+          rating?: string | null
+          sector: string
+          solutions?: Json
+          status?: string
+          summary?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          business_name?: string
+          created_at?: string
+          gaps?: Json
+          id?: string
+          language?: string
+          overall_score?: number | null
+          pillar_scores?: Json
+          project_id?: string | null
+          rating?: string | null
+          sector?: string
+          solutions?: Json
+          status?: string
+          summary?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_assessments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      health_questions: {
+        Row: {
+          created_at: string
+          id: string
+          input_type: string
+          is_active: boolean
+          options: Json | null
+          order_index: number
+          pillar: string
+          question_am: string | null
+          question_en: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_type?: string
+          is_active?: boolean
+          options?: Json | null
+          order_index?: number
+          pillar: string
+          question_am?: string | null
+          question_en: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_type?: string
+          is_active?: boolean
+          options?: Json | null
+          order_index?: number
+          pillar?: string
+          question_am?: string | null
+          question_en?: string
+        }
+        Relationships: []
+      }
+      knowledge_chunks: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string
+          document_id: string
+          embedding: string | null
+          id: string
+          metadata: Json
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          created_at?: string
+          document_id: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string
+          document_id?: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_documents: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          language: string
+          sector: string | null
+          source: string | null
+          title: string
+          total_chunks: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          language?: string
+          sector?: string | null
+          source?: string | null
+          title: string
+          total_chunks?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          language?: string
+          sector?: string | null
+          source?: string | null
+          title?: string
+          total_chunks?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       marketplace_templates: {
         Row: {
           category: string
@@ -184,7 +359,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_knowledge: {
+        Args: {
+          filter_language?: string
+          match_count?: number
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          document_id: string
+          id: string
+          metadata: Json
+          similarity: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
