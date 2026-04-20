@@ -68,11 +68,16 @@ Deno.serve(async (req) => {
         .single();
       if (docErr) throw new Error(`Insert doc failed: ${docErr.message}`);
 
-      // batch embed (Voyage limit ~128 per call, we go 32 to be safe)
-      const BATCH = 32;
+      // Voyage free tier: 3 RPM. Use larger batches (up to 128) and sleep 21s between calls.
+      const BATCH = 128;
       let idx = 0;
+      let callCount = 0;
       for (let i = 0; i < doc.chunks.length; i += BATCH) {
         const batch = doc.chunks.slice(i, i + BATCH);
+        if (callCount > 0) {
+          await new Promise((r) => setTimeout(r, 21000));
+        }
+        callCount++;
         const embeddings = await embedBatch(batch, VOYAGE_API_KEY);
         const rows = batch.map((content, j) => ({
           document_id: docRow.id,
