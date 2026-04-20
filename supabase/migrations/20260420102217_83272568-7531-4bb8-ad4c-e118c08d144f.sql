@@ -1,0 +1,10 @@
+UPDATE public.health_questions SET options = '["Less than 10","10-50","51-200","201-1000","More than 1000"]'::jsonb, question_am = 'የአሁኑን የደንበኛ ቁጥር እንዴት ይገልጹታል?' WHERE question_en = 'How would you describe your current customer base size?';
+UPDATE public.health_questions SET options = '["Yes, fully documented","Partially documented","No, not documented"]'::jsonb, question_am = 'መደበኛ የስራ አሰራር ሰነዶች አሉዎት?' WHERE question_en = 'Do you have documented standard operating procedures?';
+UPDATE public.health_questions SET options = '["Yes, all current","Some expired/missing","Not sure"]'::jsonb, question_am = 'ሁሉም የንግድ ፈቃዶችዎ ወቅታዊ ናቸው?' WHERE question_en = 'Are all your business licenses and permits up to date?';
+UPDATE public.health_questions SET question_am = 'ከገቢዎ ስንት በመቶ የሚሆነው ከ3 ምርጥ ደንበኞችዎ ነው?' WHERE question_en = 'What percentage of revenue comes from your top 3 customers?';
+UPDATE public.health_questions SET question_am = 'አማካይ ወርሃዊ ገቢዎ (ETB) ስንት ነው?' WHERE question_en = 'What is your average monthly revenue (ETB)?';
+UPDATE public.health_questions SET question_am = 'አማካይ ወርሃዊ የስራ ወጪዎ (ETB) ስንት ነው?' WHERE question_en = 'What is your average monthly operating cost (ETB)?';
+UPDATE public.health_questions SET question_am = 'አሁን ምን ያህል ወር የሚሸፍን ገንዘብ አለዎት?' WHERE question_en = 'How many months of runway do you currently have?';
+UPDATE public.health_questions SET question_am = 'ምን ያህል ሙሉ-ጊዜ ሰራተኞች አሉዎት?' WHERE question_en = 'How many full-time employees do you have?';
+UPDATE public.health_questions SET question_am = 'አሁን ዋነኛው የእድገት ፈተናዎ ምንድነው?' WHERE question_en = 'What is your primary growth challenge right now?';
+UPDATE public.health_questions SET question_am = 'ለቀጣዮቹ 12 ወራት ዋነኛ ግብዎ ምንድነው?' WHERE question_en = 'What is your main goal for the next 12 months?';
