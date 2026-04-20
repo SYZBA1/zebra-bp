@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import ProjectSetup from "@/components/studio/ProjectSetup";
 import TemplateBrowser from "@/components/studio/TemplateBrowser";
 import EditorView from "@/components/studio/EditorView";
+import HealthDiagnostic from "@/components/studio/HealthDiagnostic";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
