@@ -2,3 +2,9 @@ project_id = "uwbcletzkxgjevmhrask"
 
 [functions.draft-section]
 verify_jwt = false
+
+[functions.ingest-knowledge]
+verify_jwt = false
+
+[functions.health-diagnose]
+verify_jwt = false
