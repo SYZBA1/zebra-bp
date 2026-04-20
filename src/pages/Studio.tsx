@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import zebraLogoLight from "@/assets/zebra-logo-light.png";
 
-type StudioView = "home" | "setup" | "templates" | "editor" | "intro";
+type StudioView = "home" | "setup" | "templates" | "editor" | "intro" | "health";
 type DocumentType = "feasibility" | "business-plan" | "strategic-business" | "org-structure" | "performance-tracking" | "business-health";
 
 interface SavedProject {
