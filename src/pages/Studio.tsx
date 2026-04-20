@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import ProjectSetup from "@/components/studio/ProjectSetup";
 import TemplateBrowser from "@/components/studio/TemplateBrowser";
 import EditorView from "@/components/studio/EditorView";
+import HealthDiagnostic from "@/components/studio/HealthDiagnostic";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import zebraLogoLight from "@/assets/zebra-logo-light.png";
 
-type StudioView = "home" | "setup" | "templates" | "editor" | "intro";
+type StudioView = "home" | "setup" | "templates" | "editor" | "intro" | "health";
 type DocumentType = "feasibility" | "business-plan" | "strategic-business" | "org-structure" | "performance-tracking" | "business-health";
 
 interface SavedProject {
@@ -103,9 +104,16 @@ const Studio = () => {
     }
   }, [savedProjects, location.state]);
 
-  // Setup complete → go to format choice (intro)
+  // Setup complete → for Business Health, jump straight to the diagnostic wizard.
+  // Otherwise go to format choice (intro).
   const handleScratchSetupComplete = (name: string, sec: string, serviceDesc: string, loc?: string, scale?: string) => {
     setPendingSetup({ name, sector: sec, serviceDesc, loc, scale });
+    if (documentType === "business-health") {
+      setProjectName(name);
+      setSector(sec);
+      setView("health");
+      return;
+    }
     setIntroChoice(null);
     setView("intro");
   };
@@ -402,6 +410,16 @@ const Studio = () => {
           initialCustomTitles={initialCustomTitles}
           initialLanguage={initialLanguage}
           useEmptyOutline={introChoice === "list"}
+        />
+      )}
+
+      {view === "health" && (
+        <HealthDiagnostic
+          businessName={projectName}
+          sector={sector}
+          language={language}
+          projectId={currentProjectId}
+          onBack={() => setView("home")}
         />
       )}
     </div>

@@ -68,13 +68,21 @@ Deno.serve(async (req) => {
         .single();
       if (docErr) throw new Error(`Insert doc failed: ${docErr.message}`);
 
-      // batch embed (Voyage limit ~128 per call, we go 32 to be safe)
-      const BATCH = 32;
+      // Voyage free tier limits: 3 RPM and 10K TPM. Keep each batch under ~8K tokens
+      // (~32K chars) and sleep 65s between Voyage calls to clear the rolling minute window.
+      const MAX_BATCH_CHARS = 32000;
       let idx = 0;
-      for (let i = 0; i < doc.chunks.length; i += BATCH) {
-        const batch = doc.chunks.slice(i, i + BATCH);
-        const embeddings = await embedBatch(batch, VOYAGE_API_KEY);
-        const rows = batch.map((content, j) => ({
+      let pending: string[] = [];
+      let pendingChars = 0;
+      const flush = async () => {
+        if (!pending.length) return;
+        const g = globalThis as any;
+        if ((g.__voyageCallCount ?? 0) > 0) {
+          await new Promise((r) => setTimeout(r, 65000));
+        }
+        g.__voyageCallCount = (g.__voyageCallCount ?? 0) + 1;
+        const embeddings = await embedBatch(pending, VOYAGE_API_KEY);
+        const rows = pending.map((content, j) => ({
           document_id: docRow.id,
           chunk_index: idx + j,
           content,
@@ -83,8 +91,18 @@ Deno.serve(async (req) => {
         }));
         const { error: chunkErr } = await supabase.from("knowledge_chunks").insert(rows);
         if (chunkErr) throw new Error(`Insert chunks failed: ${chunkErr.message}`);
-        idx += batch.length;
+        idx += pending.length;
+        pending = [];
+        pendingChars = 0;
+      };
+      for (const chunk of doc.chunks) {
+        if (pendingChars + chunk.length > MAX_BATCH_CHARS && pending.length) {
+          await flush();
+        }
+        pending.push(chunk);
+        pendingChars += chunk.length;
       }
+      await flush();
       results.push({ document: doc.title, chunks_inserted: doc.chunks.length });
     }
 
