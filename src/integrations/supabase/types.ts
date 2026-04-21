@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointment_audit_log: {
+        Row: {
+          appointment_id: string
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_status: string
+          old_status: string | null
+        }
+        Insert: {
+          appointment_id: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status: string
+          old_status?: string | null
+        }
+        Update: {
+          appointment_id?: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string
+          old_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_audit_log_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "consultant_appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_conversations: {
         Row: {
           created_at: string
