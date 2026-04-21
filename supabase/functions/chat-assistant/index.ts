@@ -1,26 +1,36 @@
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
-import { corsHeaders } from "npm:@supabase/supabase-js@2.45.0/cors";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
-const VOYAGE_API_KEY = Deno.env.get("VOYAGE_API_KEY")!;
+const VOYAGE_API_KEY = Deno.env.get("VOYAGE_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const SYSTEM_PROMPT = `You are the Zebra Business Intelligence front-desk assistant for Ethiopian entrepreneurs.
+const SYSTEM_PROMPT = `You are the Zebra Business Intelligence front-desk assistant — a polite, knowledgeable advisor for Ethiopian entrepreneurs and any business-related question worldwide.
 
-Mission:
-- Give concise, actionable advice grounded in the Zebra 6-pillar feasibility framework (Market, Operations, Finance, Legal, Risk, Strategy).
-- Use Ethiopian context: Telebirr, CBE, Chapa, NBE rules, ETB currency, local sectors.
-- When KNOWLEDGE_CONTEXT is provided, prefer it over general knowledge and cite naturally.
+Scope (answer ALL of these warmly and thoroughly):
+- About the Zebra platform: feasibility studies, business plans, organisational structure, performance tracking, marketplace templates, health diagnostic, pricing, how to use the Studio.
+- Any business sector or topic: marketing, finance, accounting, HR, operations, strategy, legal basics, taxation, fundraising, e-commerce, exports, agriculture, manufacturing, services, tech startups, etc.
+- Ethiopian context first when relevant: Telebirr, CBE, Chapa, NBE rules, ETB currency, local sectors, MoR tax, investment licenses — but also help with global business questions.
+- Use the Zebra 6-pillar framework (Market, Operations, Finance, Legal, Risk, Strategy) when structuring feasibility-style answers.
+
+Style:
+- Always polite, encouraging, and professional. Greet warmly on first reply.
+- Be concise but complete. Use markdown: short paragraphs, bullets, **bold** key terms.
+- When KNOWLEDGE_CONTEXT is provided, prefer it and weave it naturally into the answer.
 - Reply in the same language the user writes in (English or Amharic).
-- Format with markdown: short paragraphs, bullets, bold for key terms.
+- Never refuse a legitimate business question. If outside business scope, gently redirect.
 
-Escalation rules — call the request_consultant_appointment tool when:
-- The user explicitly asks to talk to a human / consultant / expert / book a meeting.
+Escalation — call request_consultant_appointment ONLY when:
+- The user explicitly asks to talk to a human / consultant / expert / book a meeting / "Appointment".
 - The question requires legal, tax, or financial advice specific to their case beyond general guidance.
-- The user has asked 2+ follow-ups on the same complex topic and still needs help.
 
-Otherwise: answer directly. Do NOT push appointments unsolicited; offer once at the end of long answers as: "Want a 1:1 with a Zebra consultant? Just say the word."`;
+Otherwise answer directly. End long answers with: "_Want a 1:1 with a Zebra consultant? Just say "Appointment"._"`;
 
 const APPOINTMENT_TOOL = {
   type: "function",
@@ -39,6 +49,7 @@ const APPOINTMENT_TOOL = {
 };
 
 async function embed(text: string): Promise<number[] | null> {
+  if (!VOYAGE_API_KEY) return null;
   try {
     const r = await fetch("https://api.voyageai.com/v1/embeddings", {
       method: "POST",
@@ -71,7 +82,6 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "message required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Get or create conversation
     let conversationId = incomingId as string | undefined;
     if (!conversationId) {
       const { data: conv } = await supabase
@@ -82,12 +92,10 @@ Deno.serve(async (req) => {
       conversationId = conv?.id;
     }
 
-    // Save user message
     await supabase.from("chat_messages").insert({
       conversation_id: conversationId, user_id: user.id, role: "user", content: message,
     });
 
-    // Load history
     const { data: history } = await supabase
       .from("chat_messages")
       .select("role, content")
@@ -95,15 +103,18 @@ Deno.serve(async (req) => {
       .order("created_at", { ascending: true })
       .limit(30);
 
-    // RAG retrieval
     let knowledgeContext = "";
     const emb = await embed(message);
     if (emb) {
-      const { data: chunks } = await supabase.rpc("match_knowledge", {
-        query_embedding: emb as any, match_count: 4, filter_language: language,
-      });
-      if (chunks && chunks.length) {
-        knowledgeContext = "\n\nKNOWLEDGE_CONTEXT:\n" + chunks.map((c: any, i: number) => `[${i + 1}] ${c.content}`).join("\n\n");
+      try {
+        const { data: chunks } = await supabase.rpc("match_knowledge", {
+          query_embedding: emb as any, match_count: 4, filter_language: language,
+        });
+        if (chunks && chunks.length) {
+          knowledgeContext = "\n\nKNOWLEDGE_CONTEXT:\n" + chunks.map((c: any, i: number) => `[${i + 1}] ${c.content}`).join("\n\n");
+        }
+      } catch (e) {
+        console.warn("RAG retrieval failed:", e);
       }
     }
 
@@ -116,7 +127,7 @@ Deno.serve(async (req) => {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages,
         tools: [APPOINTMENT_TOOL],
       }),
@@ -124,9 +135,10 @@ Deno.serve(async (req) => {
 
     if (!aiResp.ok) {
       const errText = await aiResp.text();
+      console.error("AI gateway error", aiResp.status, errText);
       if (aiResp.status === 429) return new Response(JSON.stringify({ error: "Rate limit. Try again shortly." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       if (aiResp.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted. Add funds in Settings." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      throw new Error(`AI error: ${errText}`);
+      return new Response(JSON.stringify({ error: `AI error: ${errText.slice(0, 200)}` }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const aiData = await aiResp.json();
