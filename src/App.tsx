@@ -10,6 +10,7 @@ import Marketplace from "./pages/Marketplace";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
+import AdminAppointments from "./pages/AdminAppointments";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import ChatWidget from "./components/chat/ChatWidget";
@@ -34,6 +35,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Studio />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/appointments"
+            element={
+              <ProtectedRoute>
+                <AdminAppointments />
               </ProtectedRoute>
             }
           />
