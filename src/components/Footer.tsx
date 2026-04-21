@@ -45,9 +45,19 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        <div className="mt-16 pt-8 border-t border-border flex justify-between items-center">
+        <div className="mt-16 pt-8 border-t border-border flex justify-between items-center gap-4">
           <p className="text-xs font-mono text-muted-foreground">© 2026 ZEBRA. All rights reserved.</p>
-          <div className="zebra-stripes w-16 h-2" />
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate("/admin/login")}
+              className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Admin login"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 11c0-1.657-1.343-3-3-3S6 9.343 6 11m6 0v6m0-6c1.657 0 3-1.343 3-3s-1.343-3-3-3M5 11h14a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2z" /></svg>
+              Admin Login
+            </button>
+            <div className="zebra-stripes w-16 h-2" />
+          </div>
         </div>
       </div>
     </footer>
