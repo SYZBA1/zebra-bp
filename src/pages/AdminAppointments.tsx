@@ -93,7 +93,7 @@ export default function AdminAppointments() {
       toast({ title: "Error loading audit log", description: error.message, variant: "destructive" });
       setAudit([]);
     } else {
-      const entries = (data || []) as AuditEntry[];
+      const entries = ((data || []) as unknown) as AuditEntry[];
       const changerIds = Array.from(new Set(entries.map(e => e.changed_by).filter(Boolean))) as string[];
       if (changerIds.length) {
         const { data: profs } = await supabase
