@@ -6,8 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, ShieldAlert } from "lucide-react";
+import { Loader2, ShieldAlert, Mail, Phone, Calendar, Clock, FileText, History } from "lucide-react";
 
 type Appointment = {
   id: string;
@@ -21,6 +23,15 @@ type Appointment = {
   language: string;
   status: string;
   created_at: string;
+};
+
+type AuditEntry = {
+  id: string;
+  changed_by: string | null;
+  old_status: string | null;
+  new_status: string;
+  created_at: string;
+  changer_name?: string | null;
 };
 
 const STATUSES = ["pending", "confirmed", "completed", "cancelled"] as const;
@@ -40,22 +51,18 @@ export default function AdminAppointments() {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [items, setItems] = useState<Appointment[]>([]);
   const [filter, setFilter] = useState<string>("all");
+  const [selected, setSelected] = useState<Appointment | null>(null);
+  const [audit, setAudit] = useState<AuditEntry[]>([]);
+  const [auditLoading, setAuditLoading] = useState(false);
 
   useEffect(() => {
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setAuthed(false);
-        setLoading(false);
-        return;
-      }
+      if (!session) { setAuthed(false); setLoading(false); return; }
       setAuthed(true);
       const { data: roleData } = await supabase
-        .from("user_roles" as any)
-        .select("role")
-        .eq("user_id", session.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+        .from("user_roles" as any).select("role")
+        .eq("user_id", session.user.id).eq("role", "admin").maybeSingle();
       const admin = !!roleData;
       setIsAdmin(admin);
       if (admin) await load();
@@ -66,8 +73,7 @@ export default function AdminAppointments() {
 
   const load = async () => {
     const { data, error } = await supabase
-      .from("consultant_appointments")
-      .select("*")
+      .from("consultant_appointments").select("*")
       .order("created_at", { ascending: false });
     if (error) {
       toast({ title: "Error loading appointments", description: error.message, variant: "destructive" });
@@ -76,16 +82,49 @@ export default function AdminAppointments() {
     setItems((data || []) as Appointment[]);
   };
 
+  const loadAudit = async (appointmentId: string) => {
+    setAuditLoading(true);
+    const { data, error } = await supabase
+      .from("appointment_audit_log" as any)
+      .select("id, changed_by, old_status, new_status, created_at")
+      .eq("appointment_id", appointmentId)
+      .order("created_at", { ascending: false });
+    if (error) {
+      toast({ title: "Error loading audit log", description: error.message, variant: "destructive" });
+      setAudit([]);
+    } else {
+      const entries = (data || []) as AuditEntry[];
+      const changerIds = Array.from(new Set(entries.map(e => e.changed_by).filter(Boolean))) as string[];
+      if (changerIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles").select("user_id, display_name")
+          .in("user_id", changerIds);
+        const nameMap = new Map((profs || []).map((p: any) => [p.user_id, p.display_name]));
+        entries.forEach(e => { if (e.changed_by) e.changer_name = nameMap.get(e.changed_by) || null; });
+      }
+      setAudit(entries);
+    }
+    setAuditLoading(false);
+  };
+
+  const openDetails = (appt: Appointment) => {
+    setSelected(appt);
+    setAudit([]);
+    loadAudit(appt.id);
+  };
+
   const updateStatus = async (id: string, status: string) => {
     const { error } = await supabase
-      .from("consultant_appointments")
-      .update({ status })
-      .eq("id", id);
+      .from("consultant_appointments").update({ status }).eq("id", id);
     if (error) {
       toast({ title: "Update failed", description: error.message, variant: "destructive" });
       return;
     }
     setItems(prev => prev.map(i => i.id === id ? { ...i, status } : i));
+    if (selected?.id === id) {
+      setSelected({ ...selected, status });
+      loadAudit(id);
+    }
     toast({ title: "Status updated", description: `Appointment marked ${status}.` });
   };
 
@@ -128,14 +167,12 @@ export default function AdminAppointments() {
           <div>
             <h1 className="text-3xl font-bold">Consultant Appointments</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Manage incoming appointment requests from the live chat.
+              Click a row for full details & change history.
             </p>
           </div>
           <div className="flex items-center gap-3">
             <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All ({items.length})</SelectItem>
                 {STATUSES.map(s => (
@@ -171,7 +208,11 @@ export default function AdminAppointments() {
                     </TableCell>
                   </TableRow>
                 ) : filtered.map(a => (
-                  <TableRow key={a.id}>
+                  <TableRow
+                    key={a.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => openDetails(a)}
+                  >
                     <TableCell>
                       <div className="font-medium">{a.full_name}</div>
                       <div className="text-xs text-muted-foreground">{a.email}</div>
@@ -194,11 +235,9 @@ export default function AdminAppointments() {
                     <TableCell>
                       <Badge variant={statusVariant(a.status)}>{a.status}</Badge>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       <Select value={a.status} onValueChange={(v) => updateStatus(a.id, v)}>
-                        <SelectTrigger className="w-36 ml-auto">
-                          <SelectValue />
-                        </SelectTrigger>
+                        <SelectTrigger className="w-36 ml-auto"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {STATUSES.map(s => (
                             <SelectItem key={s} value={s}>{s}</SelectItem>
@@ -213,6 +252,111 @@ export default function AdminAppointments() {
           </CardContent>
         </Card>
       </div>
+
+      <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+          {selected && (
+            <>
+              <SheetHeader>
+                <SheetTitle>{selected.topic}</SheetTitle>
+                <SheetDescription>
+                  Submitted {new Date(selected.created_at).toLocaleString()}
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="mt-6 space-y-5">
+                <div className="flex items-center gap-2">
+                  <Badge variant={statusVariant(selected.status)}>{selected.status}</Badge>
+                  <span className="text-xs uppercase text-muted-foreground">{selected.language}</span>
+                </div>
+
+                <div>
+                  <div className="text-sm font-medium mb-2">Requester</div>
+                  <div className="space-y-1.5 text-sm">
+                    <div className="font-medium">{selected.full_name}</div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Mail className="h-3.5 w-3.5" /> {selected.email}
+                    </div>
+                    {selected.phone && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Phone className="h-3.5 w-3.5" /> {selected.phone}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <div className="text-sm font-medium mb-2">Preferred Schedule</div>
+                  <div className="space-y-1.5 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-3.5 w-3.5" />
+                      {selected.preferred_date || "No preferred date"}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-3.5 w-3.5" />
+                      {selected.preferred_time || "No preferred time"}
+                    </div>
+                  </div>
+                </div>
+
+                {selected.description && (
+                  <>
+                    <Separator />
+                    <div>
+                      <div className="text-sm font-medium mb-2 flex items-center gap-2">
+                        <FileText className="h-3.5 w-3.5" /> Description
+                      </div>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        {selected.description}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                <Separator />
+
+                <div>
+                  <div className="text-sm font-medium mb-3 flex items-center gap-2">
+                    <History className="h-3.5 w-3.5" /> Status History
+                  </div>
+                  {auditLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  ) : audit.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No changes recorded yet.</p>
+                  ) : (
+                    <ol className="space-y-3 border-l-2 border-border pl-4">
+                      {audit.map(e => (
+                        <li key={e.id} className="relative">
+                          <span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full bg-primary" />
+                          <div className="text-sm">
+                            {e.old_status ? (
+                              <>
+                                <Badge variant="outline" className="mr-1">{e.old_status}</Badge>
+                                →
+                                <Badge variant={statusVariant(e.new_status)} className="ml-1">{e.new_status}</Badge>
+                              </>
+                            ) : (
+                              <>
+                                Created as{" "}
+                                <Badge variant={statusVariant(e.new_status)}>{e.new_status}</Badge>
+                              </>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {e.changer_name || (e.changed_by ? "Admin" : "System")} · {new Date(e.created_at).toLocaleString()}
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

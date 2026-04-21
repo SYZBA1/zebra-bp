@@ -31,16 +31,40 @@ export default function ChatWidget() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Load chat history on open
   useEffect(() => {
-    if (open && messages.length === 0) {
+    if (!open || !authed || messages.length > 0) return;
+    (async () => {
+      const { data: convs } = await supabase
+        .from("chat_conversations")
+        .select("id")
+        .order("updated_at", { ascending: false })
+        .limit(1);
+      const latest = convs?.[0]?.id;
+      if (latest) {
+        const { data: msgs } = await supabase
+          .from("chat_messages")
+          .select("role, content, metadata")
+          .eq("conversation_id", latest)
+          .order("created_at", { ascending: true });
+        if (msgs && msgs.length) {
+          setConversationId(latest);
+          setMessages(msgs.map((m: any) => ({
+            role: m.role as "user" | "assistant",
+            content: m.content,
+            appointmentRequest: m.metadata?.appointment ?? null,
+          })));
+          return;
+        }
+      }
       setMessages([{
         role: "assistant",
         content: language === "am"
-          ? "ሰላም! እኔ የዜብራ የንግድ ረዳት ነኝ። ስለ ፊዚቢሊቲ ጥናት፣ የንግድ ዕቅድ፣ ፋይናንስ ወይም ሌላ ጥያቄ ካለዎት ይጠይቁ።"
-          : "Hi! I'm the Zebra business assistant. Ask me anything about feasibility studies, business plans, financing, or Ethiopian market entry. I can also book a 1:1 with a real consultant.",
+          ? "ሰላም! እኔ የዜብራ የንግድ ረዳት ነኝ። ስለ ኩባንያችን፣ ፊዚቢሊቲ ጥናት፣ የንግድ ዕቅድ፣ ፋይናንስ ወይም ሌላ ማንኛውም የንግድ ጥያቄ ይጠይቁኝ። ከባለሙያ ጋር 1:1 ቀጠሮ ለመያዝ \"Appointment\" ብለው ይላኩ።"
+          : "Hi! I'm the Zebra business assistant. Ask me anything about our company, feasibility studies, business plans, financing, Ethiopian market entry, or any business-related question. For a 1:1 with a real consultant, send me \"Appointment\".",
       }]);
-    }
-  }, [open, language]);
+    })();
+  }, [open, authed, language]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -52,6 +76,18 @@ export default function ChatWidget() {
     if (!authed) { toast.error(language === "am" ? "እባክዎ ይግቡ" : "Please sign in to chat"); return; }
     setInput("");
     setMessages((m) => [...m, { role: "user", content: text }]);
+
+    // Direct trigger: "Appointment" keyword shows form immediately
+    if (/^\s*appointment\s*\.?\s*$/i.test(text) || /^\s*ቀጠሮ\s*$/.test(text)) {
+      const reply = language === "am"
+        ? "እሺ! ከባለሙያ ጋር ቀጠሮ ለመያዝ ከታች ያለውን ቅጽ ይሙሉ።"
+        : "Great! Please fill the form below to book a 1:1 with a Zebra consultant.";
+      setMessages((m) => [...m, { role: "assistant", content: reply }]);
+      setFormTopic(undefined);
+      setShowForm(true);
+      return;
+    }
+
     setSending(true);
     try {
       const { data, error } = await supabase.functions.invoke("chat-assistant", {
