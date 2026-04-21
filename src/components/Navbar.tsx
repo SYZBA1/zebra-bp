@@ -16,13 +16,19 @@ import {
 
 const Navbar = () => {
   const [session, setSession] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [theme, setTheme] = useState(getStoredTheme());
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setSession(session));
-    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+    const checkAdmin = async (uid?: string) => {
+      if (!uid) { setIsAdmin(false); return; }
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle();
+      setIsAdmin(!!data);
+    };
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => { setSession(s); checkAdmin(s?.user?.id); });
+    supabase.auth.getSession().then(({ data: { session } }) => { setSession(session); checkAdmin(session?.user?.id); });
     return () => subscription.unsubscribe();
   }, []);
 
@@ -58,6 +64,9 @@ const Navbar = () => {
           <button onClick={toggleTheme} className="p-1.5 rounded hover:bg-secondary transition-colors">
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
+          {isAdmin && (
+            <button onClick={() => navigate("/admin/appointments")} className="text-sm font-mono text-primary hover:underline">Admin</button>
+          )}
           {session && (
             <ProfileSidebar>
               <button className="p-1.5 rounded-full border border-border hover:bg-secondary transition-colors">
@@ -98,6 +107,9 @@ const Navbar = () => {
                 <button className="text-sm font-mono text-left py-3 px-3 rounded-sm hover:bg-secondary transition-colors flex items-center gap-2" onClick={toggleTheme}>
                   {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />} Toggle Theme
                 </button>
+                {isAdmin && (
+                  <button className="text-sm font-mono text-left py-3 px-3 rounded-sm text-primary hover:bg-secondary transition-colors" onClick={() => { setMobileOpen(false); navigate("/admin/appointments"); }}>Admin Dashboard</button>
+                )}
                 <div className="pt-4 border-t border-border mt-2">
                   <Button className="w-full" onClick={() => { setMobileOpen(false); handleStudio(); }}>Enter Studio</Button>
                 </div>
