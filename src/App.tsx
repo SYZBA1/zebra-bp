@@ -12,6 +12,7 @@ import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
 import AdminAppointments from "./pages/AdminAppointments";
 import AdminLogin from "./pages/AdminLogin";
+import Flyer from "./pages/Flyer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import NotFound from "./pages/NotFound";
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/flyer" element={<Flyer />} />
           <Route
             path="/studio"
             element={
