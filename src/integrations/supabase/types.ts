@@ -534,6 +534,33 @@ export type Database = {
         }
         Relationships: []
       }
+      visitor_feedback: {
+        Row: {
+          comment: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string | null
+          rating: number
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+          rating: number
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+          rating?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
