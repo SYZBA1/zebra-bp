@@ -10,8 +10,16 @@ import Marketplace from "./pages/Marketplace";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
-import AdminAppointments from "./pages/AdminAppointments";
 import AdminLogin from "./pages/AdminLogin";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminFeedback from "./pages/admin/AdminFeedback";
+import AdminAppointmentsPage from "./pages/admin/AdminAppointmentsPage";
+import AdminMarketplace from "./pages/admin/AdminMarketplace";
+import AdminBudgets from "./pages/admin/AdminBudgets";
+import AdminBlog from "./pages/admin/AdminBlog";
+import AdminDocuments from "./pages/admin/AdminDocuments";
 import Flyer from "./pages/Flyer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -44,13 +52,22 @@ const App = () => (
           />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route
-            path="/admin/appointments"
+            path="/admin"
             element={
               <AdminRoute>
-                <AdminAppointments />
+                <AdminLayout />
               </AdminRoute>
             }
-          />
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="feedback" element={<AdminFeedback />} />
+            <Route path="appointments" element={<AdminAppointmentsPage />} />
+            <Route path="marketplace" element={<AdminMarketplace />} />
+            <Route path="budgets" element={<AdminBudgets />} />
+            <Route path="blog" element={<AdminBlog />} />
+            <Route path="documents" element={<AdminDocuments />} />
+          </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -23,7 +23,7 @@ const AdminLogin = () => {
           .eq("user_id", session.user.id)
           .eq("role", "admin")
           .maybeSingle();
-        if (data) navigate("/admin/appointments", { replace: true });
+        if (data) navigate("/admin", { replace: true });
       }
     });
   }, [navigate]);
@@ -50,7 +50,7 @@ const AdminLogin = () => {
       }
 
       toast.success("Welcome, admin!");
-      navigate("/admin/appointments", { replace: true });
+      navigate("/admin", { replace: true });
     } catch (err: any) {
       toast.error(err.message || "Login failed");
     } finally {
