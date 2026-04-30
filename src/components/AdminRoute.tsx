@@ -32,7 +32,3 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default AdminRoute;
-  return <>{children}</>;
-};
-
-export default AdminRoute;
