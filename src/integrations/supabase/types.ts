@@ -435,10 +435,17 @@ export type Database = {
           custom_titles: Json
           description: string
           document_type: string
+          full_document: string | null
           id: string
           is_premium: boolean
+          is_verified: boolean
+          owner_name: string
+          owner_type: string
           price_cents: number | null
+          rating: number
+          rating_count: number
           sector: string
+          summary: string | null
           title: string
           updated_at: string
         }
@@ -450,10 +457,17 @@ export type Database = {
           custom_titles?: Json
           description: string
           document_type?: string
+          full_document?: string | null
           id?: string
           is_premium?: boolean
+          is_verified?: boolean
+          owner_name?: string
+          owner_type?: string
           price_cents?: number | null
+          rating?: number
+          rating_count?: number
           sector: string
+          summary?: string | null
           title: string
           updated_at?: string
         }
@@ -465,10 +479,17 @@ export type Database = {
           custom_titles?: Json
           description?: string
           document_type?: string
+          full_document?: string | null
           id?: string
           is_premium?: boolean
+          is_verified?: boolean
+          owner_name?: string
+          owner_type?: string
           price_cents?: number | null
+          rating?: number
+          rating_count?: number
           sector?: string
+          summary?: string | null
           title?: string
           updated_at?: string
         }
@@ -590,6 +611,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      template_purchases: {
+        Row: {
+          admin_note: string | null
+          amount_etb: number
+          created_at: string
+          delivered_at: string | null
+          id: string
+          payment_method: string
+          status: string
+          template_id: string
+          transaction_ref: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount_etb?: number
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          payment_method: string
+          status?: string
+          template_id: string
+          transaction_ref: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount_etb?: number
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          payment_method?: string
+          status?: string
+          template_id?: string
+          transaction_ref?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_purchases_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
