@@ -84,26 +84,38 @@ export default function PremiumCheckoutDialog({ template, open, onOpenChange, on
     }
   };
 
-  const finalize = () => {
-    if (delivery === "studio") {
-      // Reuse free flow: create project from template content.
-      navigate("/marketplace");
+  const finalize = async () => {
+    const { parseTemplateDocument, buildContentsFromTemplate } = await import("@/lib/parse-template");
+    const parsed = parseTemplateDocument(template.full_document || "");
+
+    if (delivery === "download") {
+      const { exportPDF } = await import("@/lib/export-document");
+      const fakeOutline = parsed.titles.map((title, i) => ({ id: String(i + 1), title, children: [] })) as any;
+      const { contents } = buildContentsFromTemplate(parsed);
+      exportPDF(template.title, fakeOutline, contents, {}, "en");
       onSuccess();
-      // The user can re-open the template; or we directly fire useInStudio.
-      // Trigger via TemplatePreviewDialog by closing both — caller handles reload.
-    } else {
-      // Trigger PDF print
-      import("@/lib/parse-template").then(({ parseTemplateDocument, buildContentsFromTemplate }) => {
-        import("@/lib/export-document").then(({ exportPDF }) => {
-          const parsed = parseTemplateDocument(template.full_document || "");
-          const fakeOutline = parsed.titles.map((title, i) => ({ id: String(i + 1), title, children: [] })) as any;
-          const { contents } = buildContentsFromTemplate(parsed);
-          exportPDF(template.title, fakeOutline, contents, {}, "en");
-        });
-      });
+      reset();
+      return;
     }
-    onSuccess();
-    reset();
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { navigate("/auth"); return; }
+    const { contents, customTitles } = buildContentsFromTemplate(parsed);
+    const docTypeMap: Record<string, string> = {
+      feasibility: "feasibility", business_plan: "business-plan",
+      company_profile: "org-structure", org_structure: "org-structure",
+      performance: "performance-tracking", business_health: "business-health",
+    };
+    const { data, error } = await supabase.from("projects").insert({
+      user_id: session.user.id,
+      name: `${template.title} — My Copy`,
+      sector: template.sector, type: "free", template_id: template.id,
+      document_type: docTypeMap[template.document_type] || "feasibility",
+      contents: contents as any, custom_titles: customTitles as any, language: "en",
+    }).select("id").single();
+    if (error || !data) { toast.error(error?.message || "Failed"); return; }
+    onSuccess(); reset();
+    navigate("/studio", { state: { resumeProjectId: data.id } });
   };
 
   return (
