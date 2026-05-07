@@ -20,6 +20,7 @@ import AdminMarketplace from "./pages/admin/AdminMarketplace";
 import AdminBudgets from "./pages/admin/AdminBudgets";
 import AdminBlog from "./pages/admin/AdminBlog";
 import AdminDocuments from "./pages/admin/AdminDocuments";
+import AdminPurchases from "./pages/admin/AdminPurchases";
 import Flyer from "./pages/Flyer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -67,6 +68,7 @@ const App = () => (
             <Route path="budgets" element={<AdminBudgets />} />
             <Route path="blog" element={<AdminBlog />} />
             <Route path="documents" element={<AdminDocuments />} />
+            <Route path="purchases" element={<AdminPurchases />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

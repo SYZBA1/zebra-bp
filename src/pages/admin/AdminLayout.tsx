@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Users, MessageSquareQuote, CalendarCheck, Store,
-  Wallet, Newspaper, FileText, LogOut, Menu, Search, Bell, Shield,
+  Wallet, Newspaper, FileText, LogOut, Menu, Search, Bell, Shield, Receipt,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ const NAV = [
   { to: "/admin/feedback", label: "Reports", icon: MessageSquareQuote },
   { to: "/admin/appointments", label: "Consultants", icon: CalendarCheck },
   { to: "/admin/marketplace", label: "Marketplace", icon: Store },
+  { to: "/admin/purchases", label: "Purchases", icon: Receipt },
   { to: "/admin/budgets", label: "Budgets", icon: Wallet },
   { to: "/admin/blog", label: "Blog", icon: Newspaper },
   { to: "/admin/documents", label: "Documents", icon: FileText },
