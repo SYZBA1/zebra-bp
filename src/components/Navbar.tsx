@@ -37,7 +37,7 @@ const Navbar = () => {
 
   const navLinks = [
     { label: "Features", href: "/#features" },
-    { label: "Process", href: "/#process" },
+    { label: "Expertise", onClick: () => navigate("/expertise") },
     { label: "Marketplace", onClick: () => navigate("/marketplace") },
     { label: "About", onClick: () => navigate("/about") },
     { label: "Blog", onClick: () => navigate("/blog") },
