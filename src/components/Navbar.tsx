@@ -36,11 +36,11 @@ const Navbar = () => {
   const toggleTheme = () => { const next = theme === "dark" ? "light" : "dark"; setTheme(next); setStoredTheme(next); };
 
   const navLinks = [
-    { label: "Features", href: "/#features" },
-    { label: "Expertise", onClick: () => navigate("/expertise") },
-    { label: "Marketplace", onClick: () => navigate("/marketplace") },
+    { label: "Home", href: "/" },
     { label: "About", onClick: () => navigate("/about") },
     { label: "Blog", onClick: () => navigate("/blog") },
+    { label: "Expertise", onClick: () => navigate("/expertise") },
+    { label: "Marketplace", onClick: () => navigate("/marketplace") },
     { label: "Contact", onClick: () => navigate("/contact") },
   ];
 
