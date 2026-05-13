@@ -251,6 +251,149 @@ export type Database = {
           },
         ]
       }
+      expert_bookings: {
+        Row: {
+          admin_note: string | null
+          amount_etb: number
+          created_at: string
+          description: string | null
+          email: string
+          expert_id: string
+          expert_user_id: string | null
+          full_name: string
+          id: string
+          language: string
+          payment_method: string
+          phone: string | null
+          preferred_date: string | null
+          preferred_time: string | null
+          status: string
+          topic: string
+          transaction_ref: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount_etb?: number
+          created_at?: string
+          description?: string | null
+          email: string
+          expert_id: string
+          expert_user_id?: string | null
+          full_name: string
+          id?: string
+          language?: string
+          payment_method?: string
+          phone?: string | null
+          preferred_date?: string | null
+          preferred_time?: string | null
+          status?: string
+          topic: string
+          transaction_ref?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount_etb?: number
+          created_at?: string
+          description?: string | null
+          email?: string
+          expert_id?: string
+          expert_user_id?: string | null
+          full_name?: string
+          id?: string
+          language?: string
+          payment_method?: string
+          phone?: string | null
+          preferred_date?: string | null
+          preferred_time?: string | null
+          status?: string
+          topic?: string
+          transaction_ref?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expert_bookings_expert_id_fkey"
+            columns: ["expert_id"]
+            isOneToOne: false
+            referencedRelation: "experts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experts: {
+        Row: {
+          accent: string
+          appointments: number
+          approval_rate: number
+          bio: string
+          created_at: string
+          deliverable: string
+          id: string
+          industry: string
+          initials: string
+          name: string
+          offering: string
+          online: boolean
+          price_etb: number
+          rating: number
+          tags: string[]
+          title: string
+          updated_at: string
+          user_id: string | null
+          verified: boolean
+          years_experience: number
+        }
+        Insert: {
+          accent?: string
+          appointments?: number
+          approval_rate?: number
+          bio?: string
+          created_at?: string
+          deliverable?: string
+          id?: string
+          industry: string
+          initials?: string
+          name: string
+          offering?: string
+          online?: boolean
+          price_etb?: number
+          rating?: number
+          tags?: string[]
+          title: string
+          updated_at?: string
+          user_id?: string | null
+          verified?: boolean
+          years_experience?: number
+        }
+        Update: {
+          accent?: string
+          appointments?: number
+          approval_rate?: number
+          bio?: string
+          created_at?: string
+          deliverable?: string
+          id?: string
+          industry?: string
+          initials?: string
+          name?: string
+          offering?: string
+          online?: boolean
+          price_etb?: number
+          rating?: number
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+          verified?: boolean
+          years_experience?: number
+        }
+        Relationships: []
+      }
       health_assessments: {
         Row: {
           answers: Json
@@ -738,7 +881,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "expert"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -866,7 +1009,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "expert"],
     },
   },
 } as const
