@@ -22,6 +22,13 @@ import AdminBudgets from "./pages/admin/AdminBudgets";
 import AdminBlog from "./pages/admin/AdminBlog";
 import AdminDocuments from "./pages/admin/AdminDocuments";
 import AdminPurchases from "./pages/admin/AdminPurchases";
+import AdminBookings from "./pages/admin/AdminBookings";
+import ExpertLogin from "./pages/ExpertLogin";
+import ExpertLayout from "./pages/expert/ExpertLayout";
+import ExpertDashboard from "./pages/expert/ExpertDashboard";
+import ExpertBookings from "./pages/expert/ExpertBookings";
+import ExpertProfile from "./pages/expert/ExpertProfile";
+import ExpertRoute from "./components/ExpertRoute";
 import Flyer from "./pages/Flyer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -71,6 +78,13 @@ const App = () => (
             <Route path="blog" element={<AdminBlog />} />
             <Route path="documents" element={<AdminDocuments />} />
             <Route path="purchases" element={<AdminPurchases />} />
+            <Route path="bookings" element={<AdminBookings />} />
+          </Route>
+          <Route path="/expert/login" element={<ExpertLogin />} />
+          <Route path="/expert" element={<ExpertRoute><ExpertLayout /></ExpertRoute>}>
+            <Route index element={<ExpertDashboard />} />
+            <Route path="bookings" element={<ExpertBookings />} />
+            <Route path="profile" element={<ExpertProfile />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
