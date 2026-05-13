@@ -1,73 +1,62 @@
-## Marketplace Upgrade Plan
 
-Major expansion of the marketplace + template lifecycle + premium payment flow. Splitting into 5 phases.
+## Expert Booking System
 
-### Phase 1 — Database & schema
+Build a complete booking + payment workflow for the Expertise feature, with a dedicated expert login area and admin oversight.
 
-Add the following via migration:
+### 1. Database (migration)
 
-**`marketplace_templates` — new columns:**
-- `owner_name` (text, default `'ZEBRA'`)
-- `owner_type` (text: `'official' | 'company' | 'community'`, default `'community'`)
-- `is_verified` (boolean, default `false`)
-- `rating` (numeric(2,1), default `0`)
-- `rating_count` (int, default `0`)
-- `summary` (text) — short preview shown before purchase
-- `full_document` (text) — full markdown content delivered after download/payment
+New tables:
+- **experts** — `user_id` (links to auth.users), `name`, `title`, `industry`, `bio`, `tags[]`, `price_etb`, `years_experience`, `rating`, `approval_rate`, `verified`, `online`, `accent`, `initials`, `appointments_count`. Seeded from existing `src/lib/experts-data.ts` (seed rows have null `user_id` until claimed).
+- **expert_bookings** — `user_id` (booker), `expert_id`, `expert_user_id`, `topic`, `description`, `preferred_date`, `preferred_time`, `amount_etb`, `payment_method` (telebirr/cbe/stripe), `transaction_ref`, `status` (pending_payment / pending_approval / confirmed / rejected / completed), `admin_note`, `created_at`.
+- Extend **app_role** enum with `'expert'`.
 
-**New table `template_purchases`:**
-- `id`, `user_id`, `template_id`, `amount_etb`, `payment_method` (`telebirr`/`cbe`/`stripe`), `transaction_ref`, `status` (`pending`/`approved`/`rejected`), `admin_note`, `delivered_at`, timestamps
-- RLS: users see/insert their own; admins see/update all
+RLS:
+- experts: public SELECT; admin write; expert can update own row.
+- expert_bookings: booker sees own; expert sees rows where `expert_user_id = auth.uid()`; admin sees all + can update.
 
-**Seed company templates** (EDB, Ministry of Labour & Skills, etc.) with `owner_type='official'`, `is_verified=true`.
+### 2. Expert authentication
 
-### Phase 2 — Marketplace browsing UX
+- `/expert/login` — sign-in/sign-up page (email + password + Google), assigns `expert` role on signup via edge function (or self-claim flow gated by admin approval).
+- `ExpertRoute.tsx` guard checking `has_role(uid, 'expert')`.
+- `/expert` layout with sidebar: Dashboard, Bookings, Profile.
+- **ExpertDashboard** — stats (pending bookings, earnings, rating).
+- **ExpertBookings** — list of bookings assigned to them; accept/reject/mark complete.
+- **ExpertProfile** — edit bio, price, availability toggle (online/offline), tags.
 
-Update `src/pages/Marketplace.tsx`:
-- Search input (filter by title / description / sector — fuzzy contains)
-- Filter chips: All / Free / Premium / Official / Company
-- Document-type filter (Feasibility / Business Plan / Company Profile / Org Structure / etc.)
-- Card now shows: owner name + verified badge, star rating, document type, price
+### 3. Booking + payment flow (user side)
 
-### Phase 3 — Template preview + Use-in-Studio (free)
+- Refactor `ExpertCard` "Book Now" to open new `BookExpertDialog`.
+- Step 1: form (topic, description, preferred date/time) — same shape as `AppointmentForm`.
+- Step 2: payment screen mirroring `PremiumCheckoutDialog` (Telebirr / CBE / Stripe placeholder + ZEBRA account info + transaction ID input).
+- Submit creates `expert_bookings` row with `status='pending_approval'`, plus a `notifications` row for admin and for the expert.
 
-New `TemplatePreviewDialog` component:
-- Opens on "Use Template"
-- Shows summary, outline (parsed from `full_document` headings), owner, rating
-- Two CTAs: **Download PDF** and **Use in Studio**
-  - Download → generate PDF from `full_document` via existing `export-document` lib
-  - Use in Studio → create project seeded with outline + section contents, navigate to `/studio`
-- Studio already supports `resumeProjectId`; we map outline headings into `outline` + `contents` jsonb
+### 4. Admin side
 
-### Phase 4 — Premium payment flow
+- New `/admin/bookings` page (`AdminBookings.tsx`) listing all expert bookings: approve / reject, view transaction ref, mark paid → triggers booking confirmation.
+- Add nav entry in `AdminLayout`.
 
-New `PremiumCheckoutDialog`:
-1. Step 1 — gateway picker (Telebirr / CBE / Stripe placeholder)
-2. Step 2 — display ZEBRA account info + amount, "I have paid" button
-3. Step 3 — paste Transaction ID, Confirm Payment → inserts `template_purchases` row (`status=pending`)
-4. After confirm → toast "Awaiting validation. We'll email you on approval."
+### 5. Notifications
 
-Edge function `validate-purchase`:
-- Admin-callable; on approval flips status, sends email with download link + invoice via existing email infra (or simple notification row if email not set up)
-- Auto-approval rule: if `transaction_ref` matches expected pattern (length/prefix), mark approved immediately (placeholder for real bank API)
+- On booking insert: insert `notifications` rows for the expert (`expert_user_id`) and for all admins (use a security-definer function or trigger).
+- Expert dashboard polls/subscribes to `notifications` and `expert_bookings` via Supabase Realtime.
 
-### Phase 5 — Admin dashboard
+### 6. Files
 
-New `src/pages/admin/AdminPurchases.tsx`:
-- Table of all purchases, filter by status
-- Approve/Reject buttons → call edge function → triggers email
-- Add nav entry in `AdminLayout`
+**New:**
+- `supabase/migrations/<ts>_expert_booking.sql`
+- `src/pages/ExpertLogin.tsx`
+- `src/pages/expert/ExpertLayout.tsx`, `ExpertDashboard.tsx`, `ExpertBookings.tsx`, `ExpertProfile.tsx`
+- `src/components/ExpertRoute.tsx`
+- `src/components/expertise/BookExpertDialog.tsx`
+- `src/pages/admin/AdminBookings.tsx`
 
-### Technical notes
+**Edited:**
+- `src/App.tsx` — register routes.
+- `src/components/expertise/ExpertCard.tsx` — wire dialog.
+- `src/pages/Expertise.tsx`, `src/components/ExpertiseSection.tsx` — replace toast with dialog; pull from DB instead of static array (fall back to seed if empty).
+- `src/pages/admin/AdminLayout.tsx` — add Bookings nav link.
 
-- Use shadcn `Dialog`, `Tabs`, `Input`, `Badge`, `Star` (lucide) for rating
-- PDF generation reuses `src/lib/export-document.ts`
-- Email delivery: use existing transactional setup if present; otherwise insert into `notifications` and surface in-app
-- Stripe stays as a labeled option only (manual ref entry) — no real Stripe integration in this pass
-- All new colors via existing semantic tokens (teal/orange palette)
-
-### Out of scope (will note to user)
-
-- Real-time bank API integration for auto-validation (mocked via ref-pattern check)
-- Actual Stripe payment processing (manual ref flow only)
-- Owner/seller onboarding UI (admin seeds owners for now)
+### Notes / assumptions
+- Payment is **manual transaction-ID submission** with admin verification (same pattern as Marketplace). No live payment gateway integration.
+- Experts self-register on `/expert/login`; admin must verify them before they appear in the public directory (`verified=true`).
+- The static `experts-data.ts` is seeded into the DB so existing UI keeps working immediately.
