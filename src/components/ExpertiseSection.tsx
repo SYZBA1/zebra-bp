@@ -109,7 +109,7 @@ const ExpertiseSection = () => {
               Join Zebra to access 100+ investment leads monthly and grow your consulting practice.
             </p>
           </div>
-          <Button size="lg" onClick={() => navigate("/auth")}>
+          <Button size="lg" onClick={() => navigate("/expert/login")}>
             Join as Expert <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
