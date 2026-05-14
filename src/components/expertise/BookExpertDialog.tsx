@@ -94,15 +94,6 @@ export default function BookExpertDialog({ expert, open, onOpenChange }: Props) 
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
 
-    // Best-effort notify expert (if they have an account)
-    if (expert.user_id) {
-      await supabase.from("notifications").insert({
-        user_id: expert.user_id,
-        type: "booking",
-        title: "New booking request",
-        message: `${details.full_name} requested: ${details.topic}`,
-      } as any);
-    }
     setStep("success");
   };
 
