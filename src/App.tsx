@@ -18,6 +18,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminFeedback from "./pages/admin/AdminFeedback";
 import AdminAppointmentsPage from "./pages/admin/AdminAppointmentsPage";
+import AdminConsultants from "./pages/admin/AdminConsultants";
 import AdminMarketplace from "./pages/admin/AdminMarketplace";
 import AdminBudgets from "./pages/admin/AdminBudgets";
 import AdminBlog from "./pages/admin/AdminBlog";
@@ -75,6 +76,7 @@ const App = () => (
             <Route path="users" element={<AdminUsers />} />
             <Route path="feedback" element={<AdminFeedback />} />
             <Route path="appointments" element={<AdminAppointmentsPage />} />
+            <Route path="consultants" element={<AdminConsultants />} />
             <Route path="marketplace" element={<AdminMarketplace />} />
             <Route path="budgets" element={<AdminBudgets />} />
             <Route path="blog" element={<AdminBlog />} />
