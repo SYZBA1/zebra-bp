@@ -37,15 +37,9 @@ export default function AdminBookings() {
   };
   useEffect(() => { load(); }, []);
 
-  const update = async (id: string, status: string, b?: Booking) => {
+  const update = async (id: string, status: string) => {
     const { error } = await supabase.from("expert_bookings").update({ status }).eq("id", id);
     if (error) { toast.error(error.message); return; }
-    if (status === "confirmed" && b?.expert_user_id) {
-      await supabase.from("notifications").insert({
-        user_id: b.expert_user_id, type: "booking", title: "Booking payment verified",
-        message: `Admin confirmed payment for ${b.full_name} — ${b.topic}`,
-      } as any);
-    }
     toast.success(`Marked ${status}`);
     load();
   };
