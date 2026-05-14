@@ -207,6 +207,15 @@ const ProfileSidebar = ({ children }: ProfileSidebarProps) => {
 
               <div>
                 <h4 className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-2">
+                  <Calendar className="h-3.5 w-3.5" /> Expert Bookings
+                </h4>
+                <Button variant="outline" className="w-full" onClick={() => navigate("/bookings")}>
+                  My Bookings
+                </Button>
+              </div>
+
+              <div>
+                <h4 className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-2">
                   <ShoppingBag className="h-3.5 w-3.5" /> Marketplace
                 </h4>
                 <Button variant="outline" className="w-full" onClick={() => navigate("/marketplace")}>
