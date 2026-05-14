@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { User, Bell, Briefcase, FileText, ShoppingBag, LogOut, Check } from "lucide-react";
+import { User, Bell, Briefcase, FileText, ShoppingBag, LogOut, Check, Calendar } from "lucide-react";
 
 interface ProfileSidebarProps {
   children: React.ReactNode;
