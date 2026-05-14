@@ -100,10 +100,10 @@ export default function AdminBookings() {
                     <TableCell>
                       {(b.status === "pending" || b.status === "pending_approval") && (
                         <div className="flex gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => update(b.id, "confirmed", b)} title="Confirm">
+                          <Button size="sm" variant="ghost" onClick={() => update(b.id, "confirmed")} title="Confirm">
                             <CheckCircle2 className="h-4 w-4 text-green-500" />
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={() => update(b.id, "rejected", b)} title="Reject">
+                          <Button size="sm" variant="ghost" onClick={() => update(b.id, "rejected")} title="Reject">
                             <XCircle className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
