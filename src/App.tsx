@@ -8,6 +8,7 @@ import Studio from "./pages/Studio";
 import Auth from "./pages/Auth";
 import Marketplace from "./pages/Marketplace";
 import Expertise from "./pages/Expertise";
+import MyBookings from "./pages/MyBookings";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
