@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Users, MessageSquareQuote, CalendarCheck, Store,
-  Wallet, Newspaper, FileText, LogOut, Menu, Search, Bell, Shield, Receipt, Briefcase,
+  Wallet, Newspaper, FileText, LogOut, Menu, Search, Bell, Shield, Receipt, Briefcase, Rocket, BookOpen,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,11 +17,13 @@ const NAV = [
   { to: "/admin/consultants", label: "Consultants", icon: Briefcase },
   { to: "/admin/appointments", label: "Appointments", icon: CalendarCheck },
   { to: "/admin/marketplace", label: "Marketplace", icon: Store },
+  { to: "/admin/studio", label: "Studio", icon: Rocket },
   { to: "/admin/purchases", label: "Purchases", icon: Receipt },
   { to: "/admin/bookings", label: "Expert Bookings", icon: Briefcase },
   { to: "/admin/budgets", label: "Budgets", icon: Wallet },
   { to: "/admin/blog", label: "Blog", icon: Newspaper },
   { to: "/admin/documents", label: "Documents", icon: FileText },
+  { to: "/admin/knowledge-base", label: "Knowledge Base", icon: BookOpen },
 ];
 
 export default function AdminLayout() {

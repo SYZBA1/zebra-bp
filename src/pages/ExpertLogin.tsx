@@ -20,8 +20,11 @@ export default function ExpertLogin() {
 
   const goExpertHome = async (uid: string) => {
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "expert").maybeSingle();
-    if (data) navigate("/expert");
-    else toast.error("Your expert account is awaiting admin approval.");
+    if (data) navigate("/expert/studio");
+    else {
+      toast.info("Your expert application is awaiting admin approval. You can still use the user portal.");
+      navigate("/studio");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

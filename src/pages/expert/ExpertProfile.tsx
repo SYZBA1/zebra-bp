@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,10 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { Loader2, Rocket } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ExpertProfile() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [exists, setExists] = useState(false);
@@ -83,7 +85,11 @@ export default function ExpertProfile() {
             <Label>Available for new bookings</Label>
           </div>
         </div>
-        <div className="flex justify-end pt-4">
+        <div className="flex items-center justify-between pt-4">
+          <Button variant="outline" onClick={() => navigate("/expert/studio")}>
+            <Rocket className="h-4 w-4 mr-2" />
+            Go to Studio
+          </Button>
           <Button onClick={save} disabled={saving}>{saving && <Loader2 className="h-4 w-4 animate-spin" />} Save Profile</Button>
         </div>
       </CardContent>

@@ -24,7 +24,7 @@ import {
 import zebraLogoLight from "@/assets/zebra-logo-light.png";
 
 type StudioView = "home" | "setup" | "templates" | "editor" | "intro" | "health";
-type DocumentType = "feasibility" | "business-plan" | "strategic-business" | "org-structure" | "performance-tracking" | "business-health";
+type DocumentType = "feasibility" | "business-plan" | "business-proposal" | "company-profile" | "strategic-business" | "org-structure" | "performance-tracking" | "business-health";
 
 interface SavedProject {
   id: string;
@@ -42,15 +42,22 @@ interface SavedProject {
 const DOC_TOOLS: { type: DocumentType; icon: any; label: string; labelAm: string; desc: string; descAm: string }[] = [
   { type: "feasibility", icon: FileText, label: "Feasibility Study", labelAm: "የተግባራዊነት ጥናት", desc: "Market viability, financial projections, and operational feasibility.", descAm: "የገበያ ተገቢነት፣ የፋይናንስ ትንበያ እና ተግባራዊነት።" },
   { type: "business-plan", icon: ClipboardList, label: "Business Plan", labelAm: "የንግድ ዕቅድ", desc: "Company description, strategy, financial plan, and growth roadmap.", descAm: "የድርጅት መግለጫ፣ ስትራቴጂ፣ ፋይናንስ እና ዕድገት።" },
+  { type: "business-proposal", icon: Settings, label: "Business Proposal", labelAm: "የንግድ ሐሳብ", desc: "A concise proposal that frames the opportunity, scope, and expected value.", descAm: "እድሉን፣ ወሰኑን እና የተጠበቀውን ዋጋ የሚያቀርብ አጭር ሐሳብ።" },
+  { type: "company-profile", icon: Building2, label: "Company Profile", labelAm: "የድርጅት መገለጫ", desc: "Organization overview, mission, core services, and business identity.", descAm: "የድርጅት አጠቃላይ እይታ፣ ተልዕኮ፣ ዋና አገልግሎቶች እና መለያ።" },
   { type: "strategic-business", icon: TrendingUp, label: "Strategic Business Development", labelAm: "ስትራቴጂካዊ የንግድ ልማት", desc: "Growth engine, B2B partnerships, CAC targets, market entry.", descAm: "የእድገት ሞተር፣ B2B አጋርነት፣ CAC ዒላማዎች።" },
   { type: "org-structure", icon: Building2, label: "Organizational Structure", labelAm: "ድርጅታዊ አወቃቀር", desc: "Hierarchy, reporting lines, key roles, recruitment timeline.", descAm: "ተዋረድ፣ ሪፖርት መስመሮች፣ ቁልፍ ሚናዎች።" },
   { type: "performance-tracking", icon: Activity, label: "Performance Tracking", labelAm: "የአፈጻጸም ክትትል", desc: "KPIs, delivery timelines, client retention, pipeline velocity.", descAm: "KPIዎች፣ ጊዜ ሰሌዳ፣ ደንበኛ ማቆየት።" },
   { type: "business-health", icon: HeartPulse, label: "Business Health Analysis", labelAm: "የንግድ ጤና ትንተና", desc: "Cash flow, profit margins, risk matrix, health dashboard.", descAm: "ገንዘብ ፍሰት፣ ትርፍ ህዳግ፣ ስጋት ማትሪክስ።" },
 ];
 
+const USER_STUDIO_TYPES: DocumentType[] = ["feasibility", "business-plan", "business-proposal", "company-profile"];
+
 const Studio = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isExpertStudio = location.pathname.startsWith("/expert/");
+  const isAdminStudio = location.pathname.startsWith("/admin/");
+  const hasFullCatalog = isExpertStudio || isAdminStudio;
   const { displayName, userId } = useProfile();
   const { toast } = useToast();
   const [view, setView] = useState<StudioView>("home");
@@ -77,6 +84,7 @@ const Studio = () => {
   };
 
   const t = (en: string, am: string) => (language === "en" ? en : am);
+  const visibleDocTools = hasFullCatalog ? DOC_TOOLS : DOC_TOOLS.filter((tool) => USER_STUDIO_TYPES.includes(tool.type));
 
   useEffect(() => {
     if (!userId) return;
@@ -198,7 +206,7 @@ const Studio = () => {
       <header className="border-b border-border h-14 flex items-center px-4 sm:px-6 justify-between shrink-0">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
-            if (view === "home") navigate("/");
+            if (view === "home") navigate(isExpertStudio ? "/expert" : "/");
             else if (view === "intro") setView("setup");
             else setView("home");
           }}>
@@ -240,7 +248,7 @@ const Studio = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-              {DOC_TOOLS.map((tool) => {
+              {visibleDocTools.map((tool) => {
                 const Icon = tool.icon;
                 return (
                   <button key={tool.type} onClick={() => handleToolSelect(tool.type)}

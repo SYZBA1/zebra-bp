@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, CalendarCheck, User, LogOut, Menu, Briefcase } from "lucide-react";
+import { LayoutDashboard, CalendarCheck, User, LogOut, Menu, Briefcase, Store, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -9,6 +9,8 @@ import { toast } from "sonner";
 const NAV = [
   { to: "/expert", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/expert/bookings", label: "Bookings", icon: CalendarCheck },
+  { to: "/expert/marketplace", label: "Marketplace", icon: Store },
+  { to: "/expert/studio", label: "Studio", icon: Rocket },
   { to: "/expert/profile", label: "Profile", icon: User },
 ];
 

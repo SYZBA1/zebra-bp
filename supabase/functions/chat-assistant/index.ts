@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    const { conversationId: incomingId, message, language = "en" } = await req.json();
+    const { conversationId: incomingId, message, language = "en", sectorId } = await req.json();
     if (!message || typeof message !== "string") {
       return new Response(JSON.stringify({ error: "message required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
     if (!conversationId) {
       const { data: conv } = await supabase
         .from("chat_conversations")
-        .insert({ user_id: user.id, language, title: message.slice(0, 60) })
+        .insert({ user_id: user.id, language, title: message.slice(0, 60), metadata: sectorId ? { sector_id: sectorId } : {} })
         .select("id")
         .single();
       conversationId = conv?.id;
@@ -107,9 +107,20 @@ Deno.serve(async (req) => {
     const emb = await embed(message);
     if (emb) {
       try {
-        const { data: chunks } = await supabase.rpc("match_knowledge", {
-          query_embedding: emb as any, match_count: 4, filter_language: language,
-        });
+        // Use sector-aware retrieval if sector_id is provided
+        const { data: chunks } = sectorId
+          ? await supabase.rpc("match_knowledge_by_sector", {
+              query_embedding: emb as any,
+              sector_id: sectorId,
+              match_count: 5,
+              filter_language: language,
+            })
+          : await supabase.rpc("match_knowledge", {
+              query_embedding: emb as any,
+              match_count: 4,
+              filter_language: language,
+            });
+        
         if (chunks && chunks.length) {
           knowledgeContext = "\n\nKNOWLEDGE_CONTEXT:\n" + chunks.map((c: any, i: number) => `[${i + 1}] ${c.content}`).join("\n\n");
         }
