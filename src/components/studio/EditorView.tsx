@@ -9,6 +9,8 @@ import { STRATEGIC_BUSINESS_OUTLINE } from "@/lib/strategic-business-outline";
 import { ORG_STRUCTURE_OUTLINE } from "@/lib/org-structure-outline";
 import { PERFORMANCE_TRACKING_OUTLINE } from "@/lib/performance-tracking-outline";
 import { BUSINESS_HEALTH_OUTLINE } from "@/lib/business-health-outline";
+import { COMPANY_PROFILE_OUTLINE } from "@/lib/company-profile-outline";
+import { BUSINESS_PROPOSAL_OUTLINE } from "@/lib/business-proposal-outline";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { exportPDF, exportDOCX } from "@/lib/export-document";
@@ -26,7 +28,7 @@ import {
 } from "@/components/ui/sheet";
 
 type Language = "en" | "am";
-type DocumentType = "feasibility" | "business-plan" | "strategic-business" | "org-structure" | "performance-tracking" | "business-health";
+type DocumentType = "feasibility" | "business-plan" | "strategic-business" | "org-structure" | "performance-tracking" | "business-health" | "company-profile" | "business-proposal";
 
 interface EditorViewProps {
   projectName: string;
@@ -126,6 +128,8 @@ const EditorView = ({ projectName, sector, documentType, onBack, projectId, init
     "org-structure": ORG_STRUCTURE_OUTLINE,
     "performance-tracking": PERFORMANCE_TRACKING_OUTLINE,
     "business-health": BUSINESS_HEALTH_OUTLINE,
+    "company-profile": COMPANY_PROFILE_OUTLINE,
+    "business-proposal": BUSINESS_PROPOSAL_OUTLINE,
   };
 
   const baseOutline = outlineMap[documentType] || FEASIBILITY_OUTLINE;
@@ -253,6 +257,8 @@ const EditorView = ({ projectName, sector, documentType, onBack, projectId, init
     "org-structure": "Organizational Structure",
     "performance-tracking": "Performance Tracking",
     "business-health": "Business Health Analysis",
+    "company-profile": "Company Profile",
+    "business-proposal": "Business Proposal",
   };
   const docLabel = docLabels[documentType] || "Document";
 

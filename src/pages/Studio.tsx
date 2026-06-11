@@ -6,6 +6,7 @@ import ProjectSetup from "@/components/studio/ProjectSetup";
 import TemplateBrowser from "@/components/studio/TemplateBrowser";
 import EditorView from "@/components/studio/EditorView";
 import HealthDiagnostic from "@/components/studio/HealthDiagnostic";
+import ZIQuestionFlow from "@/components/studio/ZIQuestionFlow";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -23,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import zebraLogoLight from "@/assets/zebra-logo-light.png";
 
-type StudioView = "home" | "setup" | "templates" | "editor" | "intro" | "health";
+type StudioView = "home" | "setup" | "templates" | "editor" | "intro" | "health" | "zi-flow";
 type DocumentType = "feasibility" | "business-plan" | "business-proposal" | "company-profile" | "strategic-business" | "org-structure" | "performance-tracking" | "business-health";
 
 interface SavedProject {
@@ -265,6 +266,10 @@ const Studio = () => {
   const handleToolSelect = (type: DocumentType) => {
     setDocumentType(type);
     setIntroChoice(null);
+    if (type === "company-profile" || type === "business-proposal") {
+      setView("zi-flow");
+      return;
+    }
     // Pre-fill setup from saved proposition when available
     if (activeProposition) {
       setPendingSetup({
@@ -276,6 +281,39 @@ const Studio = () => {
       setPendingSetup(null);
     }
     setView("setup");
+  };
+
+  const handleZIComplete = async (answers: Record<string, any>, contents: Record<string, string>) => {
+    // Derive a project name from the answers
+    const name =
+      answers.identity?.companyName ||
+      answers.recipient?.recipientName ||
+      (documentType === "company-profile" ? "Company Profile" : "Business Proposal");
+    const sector = (incomingPhase1 ?? {})?.q1_sector || activeProposition?.businessName || name;
+
+    setProjectName(name);
+    setSector(sector);
+    setInitialContents(contents);
+    setInitialCustomTitles({});
+    setIntroChoice("outline");
+
+    if (userId) {
+      const { data, error } = await supabase.from("projects").insert({
+        user_id: userId,
+        name,
+        sector,
+        type: "zi",
+        document_type: documentType,
+        language,
+        contents: contents as any,
+        custom_titles: {} as any,
+        service_description: answers.solution || answers.identity?.oneLiner || "",
+      } as any).select("id").single();
+      if (data) setCurrentProjectId(data.id);
+      if (error) toast({ title: "Error", description: "Failed to save project", variant: "destructive" });
+    }
+
+    setView("editor");
   };
 
   const docTypeLabel = (dt: string) => DOC_TOOLS.find((d) => d.type === dt)?.[language === "am" ? "labelAm" : "label"] || dt;
@@ -529,6 +567,15 @@ const Studio = () => {
           sector={sector}
           language={language}
           projectId={currentProjectId}
+          onBack={() => setView("home")}
+        />
+      )}
+
+      {view === "zi-flow" && (documentType === "company-profile" || documentType === "business-proposal") && (
+        <ZIQuestionFlow
+          documentType={documentType}
+          initialLanguage={language}
+          onComplete={handleZIComplete}
           onBack={() => setView("home")}
         />
       )}
