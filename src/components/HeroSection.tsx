@@ -65,7 +65,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.7 }}
           >
-            <Button size="lg" className="group text-lg px-8 py-6" onClick={() => navigate("/studio")}>
+            <Button size="lg" className="group text-lg px-8 py-6" onClick={() => navigate("/phase1")}>
               Start Architecting
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>

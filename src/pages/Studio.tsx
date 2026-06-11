@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ArrowLeft, Languages, Sun, Moon, FileText, TrendingUp, Building2, Activity, HeartPulse, ClipboardList, Settings, Trash2, Menu } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, Languages, Sun, Moon, FileText, TrendingUp, Building2, Activity, HeartPulse, ClipboardList, Settings, Trash2, Sparkles, Plus, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import ProjectSetup from "@/components/studio/ProjectSetup";
@@ -52,6 +52,65 @@ const DOC_TOOLS: { type: DocumentType; icon: any; label: string; labelAm: string
 
 const USER_STUDIO_TYPES: DocumentType[] = ["feasibility", "business-plan", "business-proposal", "company-profile"];
 
+const TOOL_COLORS: Record<string, { from: string; to: string; glow: string; iconBg: string }> = {
+  "feasibility":          { from: "#1d4ed8", to: "#0891b2", glow: "rgba(56,189,248,0.25)",  iconBg: "rgba(56,189,248,0.15)" },
+  "business-plan":        { from: "#7c3aed", to: "#2563eb", glow: "rgba(139,92,246,0.25)",  iconBg: "rgba(139,92,246,0.15)" },
+  "business-proposal":    { from: "#ea580c", to: "#dc2626", glow: "rgba(249,115,22,0.25)",  iconBg: "rgba(249,115,22,0.15)" },
+  "company-profile":      { from: "#059669", to: "#0891b2", glow: "rgba(16,185,129,0.25)",  iconBg: "rgba(16,185,129,0.15)" },
+  "strategic-business":   { from: "#d97706", to: "#ea580c", glow: "rgba(245,158,11,0.25)",  iconBg: "rgba(245,158,11,0.15)" },
+  "org-structure":        { from: "#db2777", to: "#7c3aed", glow: "rgba(219,39,119,0.25)",  iconBg: "rgba(219,39,119,0.15)" },
+  "performance-tracking": { from: "#dc2626", to: "#d97706", glow: "rgba(220,38,38,0.25)",   iconBg: "rgba(220,38,38,0.15)" },
+  "business-health":      { from: "#0891b2", to: "#059669", glow: "rgba(8,145,178,0.25)",   iconBg: "rgba(8,145,178,0.15)" },
+};
+
+const TiltCard = ({
+  children, onClick, className = "", glowColor,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+  glowColor?: string;
+}) => {
+  const ref = useRef<HTMLButtonElement>(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0, shine: { x: 50, y: 50 } });
+  const [hovered, setHovered] = useState(false);
+
+  const onMove = (e: React.MouseEvent) => {
+    const r = ref.current?.getBoundingClientRect();
+    if (!r) return;
+    const px = (e.clientX - r.left) / r.width;
+    const py = (e.clientY - r.top) / r.height;
+    setTilt({ x: (py - 0.5) * 16, y: -(px - 0.5) * 16, shine: { x: px * 100, y: py * 100 } });
+  };
+
+  return (
+    <button
+      ref={ref}
+      onClick={onClick}
+      onMouseMove={onMove}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setTilt({ x: 0, y: 0, shine: { x: 50, y: 50 } }); setHovered(false); }}
+      className={className}
+      style={{
+        transform: `perspective(900px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) ${hovered ? "scale(1.03)" : "scale(1)"}`,
+        transition: hovered ? "transform 0.08s ease-out" : "transform 0.4s ease-out",
+        boxShadow: hovered && glowColor ? `0 20px 60px ${glowColor}, 0 4px 20px rgba(0,0,0,0.4)` : "0 4px 20px rgba(0,0,0,0.3)",
+      }}
+    >
+      {/* Shine overlay */}
+      {hovered && (
+        <div
+          className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-20"
+          style={{
+            background: `radial-gradient(circle at ${tilt.shine.x}% ${tilt.shine.y}%, rgba(255,255,255,0.6), transparent 60%)`,
+          }}
+        />
+      )}
+      {children}
+    </button>
+  );
+};
+
 const Studio = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -74,8 +133,12 @@ const Studio = () => {
   const [initialLanguage, setInitialLanguage] = useState<"en" | "am">("en");
   const [showFromFeasibility, setShowFromFeasibility] = useState(false);
   const [introChoice, setIntroChoice] = useState<"outline" | "list" | null>(null);
-  // Store setup data temporarily before format choice
   const [pendingSetup, setPendingSetup] = useState<{ name: string; sector: string; serviceDesc: string; loc?: string; scale?: string } | null>(null);
+
+  // Proposition data passed from BusinessProposition page after save
+  const incomingProposition = (location.state as any)?.proposition as Record<string, string> | undefined;
+  const incomingPhase1 = (location.state as any)?.phase1Answers as Record<string, string> | undefined;
+  const [activeProposition, setActiveProposition] = useState<Record<string, string> | null>(incomingProposition ?? null);
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
@@ -95,7 +158,14 @@ const Studio = () => {
         .select("*")
         .eq("user_id", userId)
         .order("updated_at", { ascending: false });
-      if (data) setSavedProjects(data as any);
+      if (data) {
+        setSavedProjects(data as any);
+        // If no proposition passed via route state, pick the most recent saved one
+        if (!incomingProposition) {
+          const latestProp = (data as any[]).find((p: any) => p.document_type === "business_proposition");
+          if (latestProp?.contents) setActiveProposition(latestProp.contents as Record<string, string>);
+        }
+      }
       setLoadingProjects(false);
     };
     load();
@@ -195,7 +265,16 @@ const Studio = () => {
   const handleToolSelect = (type: DocumentType) => {
     setDocumentType(type);
     setIntroChoice(null);
-    setPendingSetup(null);
+    // Pre-fill setup from saved proposition when available
+    if (activeProposition) {
+      setPendingSetup({
+        name: activeProposition.businessName || "",
+        sector: (incomingPhase1 ?? {})?.q1_sector || activeProposition.businessName || "",
+        serviceDesc: activeProposition.solution || "",
+      });
+    } else {
+      setPendingSetup(null);
+    }
     setView("setup");
   };
 
@@ -246,6 +325,29 @@ const Studio = () => {
               </h2>
               <p className="text-sm text-muted-foreground">{t("Launch a fresh initiative — choose a document tool to begin.", "አዲስ ተነሳሽነት ይጀምሩ — ለመጀመር የሰነድ መሣሪያ ይምረጡ።")}</p>
             </div>
+
+            {/* Business Proposition foundation banner */}
+            {activeProposition && (
+              <div className="mb-6 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-mono uppercase tracking-widest text-primary mb-1">
+                    {t("Active Business Proposition", "ንቁ ንግድ ሐሳብ")}
+                  </p>
+                  <p className="font-display font-bold text-sm truncate">{activeProposition.businessName}</p>
+                  {activeProposition.solution && (
+                    <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{activeProposition.solution}</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => navigate("/studio/business-proposition")}>
+                    {t("Edit", "አርትዕ")}
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => setActiveProposition(null)}>
+                    ✕
+                  </Button>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
               {visibleDocTools.map((tool) => {

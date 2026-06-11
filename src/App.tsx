@@ -38,6 +38,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import NotFound from "./pages/NotFound";
 import ChatWidget from "./components/chat/ChatWidget";
+import Phase1Flow from "./components/studio/Phase1Flow";
+import BusinessProposition from "./components/studio/BusinessProposition";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +64,22 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Studio />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/phase1"
+            element={
+              <ProtectedRoute>
+                <Phase1Flow />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/studio/business-proposition"
+            element={
+              <ProtectedRoute>
+                <BusinessProposition />
               </ProtectedRoute>
             }
           />

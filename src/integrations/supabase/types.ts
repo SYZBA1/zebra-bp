@@ -49,6 +49,42 @@ export type Database = {
           },
         ]
       }
+      business_documents: {
+        Row: {
+          content: Json
+          created_at: string
+          document_type: string
+          id: string
+          phase1_answers: Json | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          document_type?: string
+          id?: string
+          phase1_answers?: Json | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          document_type?: string
+          id?: string
+          phase1_answers?: Json | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string | null

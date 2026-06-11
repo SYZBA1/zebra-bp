@@ -32,7 +32,7 @@ const Navbar = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleStudio = () => navigate(session ? "/studio" : "/auth");
+  const handleStudio = () => navigate(session ? "/phase1" : "/auth");
   const toggleTheme = () => { const next = theme === "dark" ? "light" : "dark"; setTheme(next); setStoredTheme(next); };
 
   const navLinks = [
