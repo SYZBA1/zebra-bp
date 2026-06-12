@@ -537,10 +537,13 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          file_path: string | null
           id: string
           language: string
+          raw_text: string | null
           sector: string | null
           source: string | null
+          status: string | null
           title: string
           total_chunks: number
           updated_at: string
@@ -548,10 +551,13 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          file_path?: string | null
           id?: string
           language?: string
+          raw_text?: string | null
           sector?: string | null
           source?: string | null
+          status?: string | null
           title: string
           total_chunks?: number
           updated_at?: string
@@ -559,13 +565,40 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          file_path?: string | null
           id?: string
           language?: string
+          raw_text?: string | null
           sector?: string | null
           source?: string | null
+          status?: string | null
           title?: string
           total_chunks?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      knowledge_sectors: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
         }
         Relationships: []
       }
@@ -714,6 +747,7 @@ export type Database = {
           language: string
           name: string
           outline: Json
+          phase1_answers: Json | null
           sector: string
           service_description: string | null
           template_id: string | null
@@ -730,6 +764,7 @@ export type Database = {
           language?: string
           name: string
           outline?: Json
+          phase1_answers?: Json | null
           sector: string
           service_description?: string | null
           template_id?: string | null
@@ -746,6 +781,7 @@ export type Database = {
           language?: string
           name?: string
           outline?: Json
+          phase1_answers?: Json | null
           sector?: string
           service_description?: string | null
           template_id?: string | null
