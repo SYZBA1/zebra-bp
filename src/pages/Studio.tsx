@@ -214,6 +214,7 @@ const Studio = () => {
         user_id: userId, name, sector: sec, type: introChoice === "list" ? "free" : "outline",
         document_type: documentType, language, contents: {} as any, custom_titles: {} as any,
         service_description: serviceDesc,
+        phase1_answers: (incomingPhase1 ?? {}) as any,
       } as any).select("id").single();
       if (data) setCurrentProjectId(data.id);
       if (error) toast({ title: "Error", description: "Failed to create project", variant: "destructive" });
@@ -308,6 +309,7 @@ const Studio = () => {
         contents: contents as any,
         custom_titles: {} as any,
         service_description: answers.solution || answers.identity?.oneLiner || "",
+        phase1_answers: (incomingPhase1 ?? {}) as any,
       } as any).select("id").single();
       if (data) setCurrentProjectId(data.id);
       if (error) toast({ title: "Error", description: "Failed to save project", variant: "destructive" });
