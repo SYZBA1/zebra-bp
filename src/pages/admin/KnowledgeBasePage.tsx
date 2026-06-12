@@ -154,7 +154,7 @@ export default function KnowledgeBasePage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={syncProjectSectors} disabled={syncingSectors} variant="secondary" className="gap-2">
+          <Button onClick={() => syncProjectSectors(false)} disabled={syncingSectors} variant="secondary" className="gap-2">
             <UploadCloud className="w-4 h-4" />
             {syncingSectors ? "Importing..." : "Import Project Sectors"}
           </Button>

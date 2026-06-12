@@ -230,7 +230,7 @@ export default function ExpertMarketplace() {
 
       let insertError: any = null;
       for (let i = 0; i < Object.keys(payload).length + 2; i++) {
-        const { error } = await supabase.from("marketplace_templates").insert(payload);
+        const { error } = await supabase.from("marketplace_templates").insert(payload as any);
         if (!error) {
           insertError = null;
           break;
