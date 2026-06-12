@@ -49,42 +49,6 @@ export type Database = {
           },
         ]
       }
-      business_documents: {
-        Row: {
-          content: Json
-          created_at: string
-          document_type: string
-          id: string
-          phase1_answers: Json | null
-          status: string
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          content?: Json
-          created_at?: string
-          document_type?: string
-          id?: string
-          phase1_answers?: Json | null
-          status?: string
-          title: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          content?: Json
-          created_at?: string
-          document_type?: string
-          id?: string
-          phase1_answers?: Json | null
-          status?: string
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       blog_posts: {
         Row: {
           author_id: string | null
@@ -618,20 +582,12 @@ export type Database = {
           id: string
           is_premium: boolean
           is_verified: boolean
-          review_note: string | null
-          review_ready_at: string | null
-          review_status: string
-          reviewed_at: string | null
-          reviewed_by_user_id: string | null
           owner_name: string
           owner_type: string
           price_cents: number | null
           rating: number
           rating_count: number
           sector: string
-          submission_file_name: string | null
-          submission_file_path: string | null
-          submitted_by_user_id: string | null
           summary: string | null
           title: string
           updated_at: string
@@ -648,20 +604,12 @@ export type Database = {
           id?: string
           is_premium?: boolean
           is_verified?: boolean
-          review_note?: string | null
-          review_ready_at?: string | null
-          review_status?: string
-          reviewed_at?: string | null
-          reviewed_by_user_id?: string | null
           owner_name?: string
           owner_type?: string
           price_cents?: number | null
           rating?: number
           rating_count?: number
           sector: string
-          submission_file_name?: string | null
-          submission_file_path?: string | null
-          submitted_by_user_id?: string | null
           summary?: string | null
           title: string
           updated_at?: string
@@ -678,20 +626,12 @@ export type Database = {
           id?: string
           is_premium?: boolean
           is_verified?: boolean
-          review_note?: string | null
-          review_ready_at?: string | null
-          review_status?: string
-          reviewed_at?: string | null
-          reviewed_by_user_id?: string | null
           owner_name?: string
           owner_type?: string
           price_cents?: number | null
           rating?: number
           rating_count?: number
           sector?: string
-          submission_file_name?: string | null
-          submission_file_path?: string | null
-          submitted_by_user_id?: string | null
           summary?: string | null
           title?: string
           updated_at?: string
