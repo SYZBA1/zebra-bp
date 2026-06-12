@@ -45,7 +45,8 @@ const AdminLogin = () => {
 
       if (!roleData) {
         await supabase.auth.signOut();
-        toast.error("Access denied. This account is not an admin.");
+        toast.error("This account is not an admin. Redirecting to user sign-in.");
+        navigate("/auth", { replace: true });
         return;
       }
 

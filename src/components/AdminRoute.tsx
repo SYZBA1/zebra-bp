@@ -27,7 +27,10 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }
-  if (state === "deny") return <Navigate to="/admin/login" replace />;
+  if (state === "deny") {
+    // Rule 1: If not logged in → admin login page; if logged in but not admin → user app
+    return <Navigate to="/auth" replace />;
+  }
   return <>{children}</>;
 };
 

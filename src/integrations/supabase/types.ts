@@ -537,10 +537,13 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          file_path: string | null
           id: string
           language: string
+          raw_text: string | null
           sector: string | null
           source: string | null
+          status: string | null
           title: string
           total_chunks: number
           updated_at: string
@@ -548,10 +551,13 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          file_path?: string | null
           id?: string
           language?: string
+          raw_text?: string | null
           sector?: string | null
           source?: string | null
+          status?: string | null
           title: string
           total_chunks?: number
           updated_at?: string
@@ -559,13 +565,40 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          file_path?: string | null
           id?: string
           language?: string
+          raw_text?: string | null
           sector?: string | null
           source?: string | null
+          status?: string | null
           title?: string
           total_chunks?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      knowledge_sectors: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
         }
         Relationships: []
       }
@@ -587,7 +620,15 @@ export type Database = {
           price_cents: number | null
           rating: number
           rating_count: number
+          review_note: string | null
+          review_ready_at: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by_user_id: string | null
           sector: string
+          submission_file_name: string | null
+          submission_file_path: string | null
+          submitted_by_user_id: string | null
           summary: string | null
           title: string
           updated_at: string
@@ -609,7 +650,15 @@ export type Database = {
           price_cents?: number | null
           rating?: number
           rating_count?: number
+          review_note?: string | null
+          review_ready_at?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
           sector: string
+          submission_file_name?: string | null
+          submission_file_path?: string | null
+          submitted_by_user_id?: string | null
           summary?: string | null
           title: string
           updated_at?: string
@@ -631,7 +680,15 @@ export type Database = {
           price_cents?: number | null
           rating?: number
           rating_count?: number
+          review_note?: string | null
+          review_ready_at?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
           sector?: string
+          submission_file_name?: string | null
+          submission_file_path?: string | null
+          submitted_by_user_id?: string | null
           summary?: string | null
           title?: string
           updated_at?: string
@@ -714,6 +771,7 @@ export type Database = {
           language: string
           name: string
           outline: Json
+          phase1_answers: Json | null
           sector: string
           service_description: string | null
           template_id: string | null
@@ -730,6 +788,7 @@ export type Database = {
           language?: string
           name: string
           outline?: Json
+          phase1_answers?: Json | null
           sector: string
           service_description?: string | null
           template_id?: string | null
@@ -746,6 +805,7 @@ export type Database = {
           language?: string
           name?: string
           outline?: Json
+          phase1_answers?: Json | null
           sector?: string
           service_description?: string | null
           template_id?: string | null
@@ -874,6 +934,22 @@ export type Database = {
         Returns: {
           content: string
           document_id: string
+          id: string
+          metadata: Json
+          similarity: number
+        }[]
+      }
+      match_knowledge_by_sector: {
+        Args: {
+          filter_language?: string
+          match_count?: number
+          query_embedding: string
+          sector_id?: string
+        }
+        Returns: {
+          content: string
+          document_id: string
+          document_title: string
           id: string
           metadata: Json
           similarity: number

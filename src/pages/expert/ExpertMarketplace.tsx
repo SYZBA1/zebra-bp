@@ -50,7 +50,7 @@ const getMissingColumnName = (err: any) => {
   const pgMatch = msg.match(/column\s+([a-zA-Z0-9_."]+)\s+does not exist/i);
   if (!pgMatch?.[1]) return null;
 
-  const raw = pgMatch[1].replaceAll('"', "");
+  const raw = pgMatch[1].replace(/"/g, "");
   const parts = raw.split(".");
   return parts[parts.length - 1] || null;
 };
@@ -230,7 +230,7 @@ export default function ExpertMarketplace() {
 
       let insertError: any = null;
       for (let i = 0; i < Object.keys(payload).length + 2; i++) {
-        const { error } = await supabase.from("marketplace_templates").insert(payload);
+        const { error } = await supabase.from("marketplace_templates").insert(payload as any);
         if (!error) {
           insertError = null;
           break;

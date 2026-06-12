@@ -27,7 +27,10 @@ const ExpertRoute = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }
-  if (state === "deny") return <Navigate to="/expert/login" replace />;
+  if (state === "deny") {
+    // Rule 1: non-experts are pushed to the user auth flow instead of the expert login
+    return <Navigate to="/auth" replace />;
+  }
   return <>{children}</>;
 };
 
