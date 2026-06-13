@@ -34,7 +34,11 @@ const Marketplace = () => {
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase.from("marketplace_templates").select("*").order("is_verified", { ascending: false }).order("rating", { ascending: false });
+      const { data } = await supabase
+        .from("marketplace_templates")
+        .select("id,title,description,sector,category,document_type,is_premium,price_cents,owner_name,owner_type,is_verified,rating,rating_count,summary,cover_image_url,created_at,review_status")
+        .order("is_verified", { ascending: false })
+        .order("rating", { ascending: false });
       if (data) setTemplates(data as any);
       setLoading(false);
     };
