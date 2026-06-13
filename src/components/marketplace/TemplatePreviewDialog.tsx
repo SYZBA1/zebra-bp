@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -48,10 +48,20 @@ export default function TemplatePreviewDialog({ template, open, onOpenChange }: 
   const navigate = useNavigate();
   const [busy, setBusy] = useState<"download" | "studio" | null>(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [fullDoc, setFullDoc] = useState<string>("");
+
+  useEffect(() => {
+    setFullDoc("");
+    if (!template || !open) return;
+    if (template.is_premium) return; // premium preview limited to outline metadata; full doc fetched at checkout
+    (supabase.rpc as any)("get_template_full_document", { _template_id: template.id }).then(({ data }: any) => {
+      if (typeof data === "string") setFullDoc(data);
+    });
+  }, [template?.id, open]);
 
   if (!template) return null;
 
-  const parsed = parseTemplateDocument(template.full_document || "");
+  const parsed = parseTemplateDocument(fullDoc || "");
 
   const requireAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();

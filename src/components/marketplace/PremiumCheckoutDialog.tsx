@@ -86,7 +86,8 @@ export default function PremiumCheckoutDialog({ template, open, onOpenChange, on
 
   const finalize = async () => {
     const { parseTemplateDocument, buildContentsFromTemplate } = await import("@/lib/parse-template");
-    const parsed = parseTemplateDocument(template.full_document || "");
+    const { data: fullDoc } = await (supabase.rpc as any)("get_template_full_document", { _template_id: template.id });
+    const parsed = parseTemplateDocument((typeof fullDoc === "string" ? fullDoc : "") || "");
 
     if (delivery === "download") {
       const { exportPDF } = await import("@/lib/export-document");

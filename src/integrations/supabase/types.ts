@@ -918,6 +918,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_template_contents: { Args: { _template_id: string }; Returns: Json }
+      get_template_full_document: {
+        Args: { _template_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
