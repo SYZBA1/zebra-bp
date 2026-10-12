@@ -27,6 +27,7 @@ import AdminPurchases from "./pages/admin/AdminPurchases";
 import AdminBookings from "./pages/admin/AdminBookings";
 import KnowledgeBasePage from "./pages/admin/KnowledgeBasePage";
 import ExpertLogin from "./pages/ExpertLogin";
+import ResetPassword from "./pages/ResetPassword";
 import ExpertLayout from "./pages/expert/ExpertLayout";
 import ExpertDashboard from "./pages/expert/ExpertDashboard";
 import ExpertBookings from "./pages/expert/ExpertBookings";
@@ -115,6 +116,7 @@ const App = () => (
             <Route path="knowledge-base" element={<KnowledgeBasePage />} />
           </Route>
           <Route path="/expert/login" element={<ExpertLogin />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/expert" element={<ExpertRoute><ExpertLayout /></ExpertRoute>}>
             <Route index element={<ExpertDashboard />} />
             <Route path="bookings" element={<ExpertBookings />} />
