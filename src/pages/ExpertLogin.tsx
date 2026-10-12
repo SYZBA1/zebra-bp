@@ -30,6 +30,19 @@ export default function ExpertLogin() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) { toast.error("Enter your email address first, then click Forgot password."); return; }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("Password reset email sent. Check your inbox and follow the link.");
+    } catch (err: any) { toast.error(err.message); }
+    finally { setLoading(false); }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
