@@ -112,7 +112,15 @@ export default function ExpertLogin() {
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div>
-            <Label className="text-xs">Password</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">Password</Label>
+              {isLogin && (
+                <button type="button" onClick={handleForgotPassword}
+                  className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 font-mono">
+                  Forgot password?
+                </button>
+              )}
+            </div>
             <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
           </div>
           <Button type="submit" disabled={loading} className="mt-2">
