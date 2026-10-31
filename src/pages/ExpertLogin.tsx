@@ -20,6 +20,8 @@ export default function ExpertLogin() {
   useEffect(() => { document.title = "Expert Portal | ZEBRA"; }, []);
 
   const goExpertHome = async (uid: string) => {
+    // Attach any application this email submitted before the account existed.
+    await supabase.rpc("link_expert_application");
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "expert").maybeSingle();
     if (data) {
       navigate("/expert");
@@ -60,17 +62,13 @@ export default function ExpertLogin() {
             emailRedirectTo: `${window.location.origin}/expert`,
           },
         });
-        if (error) throw error;
-        if (data.user) {
-          await supabase.from("experts").insert({
-            user_id: data.user.id, name: name || email,
-            title: "New Consultant", industry: industry || "General",
-            bio: "Pending profile completion.",
-            verified: false, online: false,
-            initials: (name || email).slice(0, 2).toUpperCase(),
-          } as any);
-        }
-        toast.success("Application received. An admin will verify your account shortly.");
+        // A duplicate account still records the application; the person then signs in and it links by email.
+        if (error && !/already registered|already been registered/i.test(error.message)) throw error;
+        const { error: applyErr } = await supabase.rpc("apply_as_expert", {
+          _name: name, _industry: industry, _email: email,
+        });
+        if (applyErr) throw applyErr;
+        toast.success("Application received. An admin will review it under Consultants.");
         setIsLogin(true);
       }
     } catch (err: any) { toast.error(err.message); }
