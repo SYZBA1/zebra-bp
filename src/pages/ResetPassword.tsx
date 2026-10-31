@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { KeyRound } from "lucide-react";
@@ -52,11 +53,11 @@ export default function ResetPassword() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
               <Label className="text-xs">New Password</Label>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+              <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
             </div>
             <div>
               <Label className="text-xs">Confirm Password</Label>
-              <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={6} />
+              <PasswordInput value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={6} />
             </div>
             <Button type="submit" disabled={loading} className="mt-2">
               {loading ? "Updating…" : "Update Password"}
