@@ -328,6 +328,7 @@ export type Database = {
       experts: {
         Row: {
           accent: string
+          applicant_email: string | null
           appointments: number
           approval_rate: number
           bio: string
@@ -350,6 +351,7 @@ export type Database = {
         }
         Insert: {
           accent?: string
+          applicant_email?: string | null
           appointments?: number
           approval_rate?: number
           bio?: string
@@ -372,6 +374,7 @@ export type Database = {
         }
         Update: {
           accent?: string
+          applicant_email?: string | null
           appointments?: number
           approval_rate?: number
           bio?: string
@@ -918,6 +921,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_as_expert: {
+        Args: { _email: string; _industry: string; _name: string }
+        Returns: string
+      }
       get_template_contents: { Args: { _template_id: string }; Returns: Json }
       get_template_full_document: {
         Args: { _template_id: string }
@@ -930,6 +937,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      link_expert_application: { Args: never; Returns: number }
       match_knowledge: {
         Args: {
           filter_language?: string
