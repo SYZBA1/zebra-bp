@@ -55,7 +55,7 @@ export default function ExpertLogin() {
         if (error) throw error;
         if (data.user) await goExpertHome(data.user.id);
       } else {
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email, password,
           options: {
             data: { display_name: name, expert_application: { industry } },
