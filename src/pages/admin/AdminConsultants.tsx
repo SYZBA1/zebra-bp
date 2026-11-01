@@ -104,7 +104,7 @@ export default function AdminConsultants() {
     }
     const { error } = await supabase.from("experts").delete().eq("id", e.id);
     if (error) { toast.error(error.message); setBusy(null); return; }
-    toast.success(`Application ${verb.toLowerCase()}.`);
+    toast.success(verb === "Deny" ? "Application denied." : "Listing removed.");
     setBusy(null);
     load();
   };
