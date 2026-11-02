@@ -7,12 +7,12 @@ const ExpertRoute = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const check = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) { setState("deny"); return; }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setState("deny"); return; }
       const { data } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", session.user.id)
+        .eq("user_id", user.id)
         .eq("role", "expert")
         .maybeSingle();
       setState(data ? "ok" : "deny");
