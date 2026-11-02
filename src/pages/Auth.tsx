@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import AuthEmailActions from "@/components/AuthEmailActions";
+import { emailReturnUrl } from "@/lib/auth-flow";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,6 +20,12 @@ const Auth = () => {
   const [resendLoading, setResendLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const navigate = useNavigate();
+  useEffect(() => {
+    if (window.location.hash || new URLSearchParams(window.location.search).has("code")) return;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (data.user) navigate("/studio", { replace: true });
+    });
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +55,7 @@ const Auth = () => {
           password,
           options: {
             data: { display_name: displayName },
-            emailRedirectTo: `${window.location.origin}/auth`,
+            emailRedirectTo: emailReturnUrl("user"),
           },
         });
         if (error) throw error;
@@ -59,7 +67,8 @@ const Auth = () => {
           return;
         }
 
-        setEmailSent(true);
+        if (data.session) navigate("/studio", { replace: true });
+        else setEmailSent(true);
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -74,7 +83,7 @@ const Auth = () => {
       const { error } = await supabase.auth.resend({
         type: "signup",
         email,
-        options: { emailRedirectTo: `${window.location.origin}/auth` },
+        options: { emailRedirectTo: emailReturnUrl("user") },
       });
       if (error) throw error;
       toast.success("Confirmation email resent! Check your inbox and spam folder.");
@@ -183,22 +192,6 @@ const Auth = () => {
               <Label htmlFor="password" className="font-mono text-xs uppercase tracking-widest">
                 Password
               </Label>
-              {isLogin && (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!email) { toast.error("Enter your email address first, then click Forgot password."); return; }
-                    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                      redirectTo: `${window.location.origin}/reset-password`,
-                    });
-                    if (error) toast.error(error.message);
-                    else toast.success("Password reset email sent. Check your inbox.");
-                  }}
-                  className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
-                >
-                  Forgot password?
-                </button>
-              )}
             </div>
             <PasswordInput
               id="password"
@@ -214,18 +207,7 @@ const Auth = () => {
           </Button>
         </form>
 
-        {isLogin && (
-          <p className="text-center text-xs text-muted-foreground mt-4 font-mono">
-            Getting "Invalid credentials"?{" "}
-            <button
-              type="button"
-              onClick={() => { setIsLogin(false); setEmailSent(false); }}
-              className="text-foreground underline underline-offset-4 hover:text-foreground/80"
-            >
-              Resend confirmation email
-            </button>
-          </p>
-        )}
+        {isLogin && <AuthEmailActions email={email} portal="user" />}
 
         <p className="text-center text-sm text-muted-foreground mt-4 font-mono">
           {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
