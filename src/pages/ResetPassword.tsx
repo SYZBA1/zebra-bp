@@ -7,33 +7,48 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { KeyRound } from "lucide-react";
+import { loginPath, readPortal } from "@/lib/auth-flow";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const portal = readPortal(window.location.search);
   const navigate = useNavigate();
 
   useEffect(() => {
     document.title = "Reset Password | ZEBRA";
     // Supabase fires PASSWORD_RECOVERY when the user lands via the reset email link
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
+      if (event === "PASSWORD_RECOVERY") {
+        sessionStorage.setItem("zebra-password-recovery", "true");
+        setReady(true);
+        setChecking(false);
+      }
     });
-    supabase.auth.getSession().then(({ data }) => { if (data.session) setReady(true); });
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    if (hash.get("type") === "recovery") sessionStorage.setItem("zebra-password-recovery", "true");
+    supabase.auth.getUser().then(({ data }) => {
+      setReady(Boolean(data.user) && sessionStorage.getItem("zebra-password-recovery") === "true");
+      setChecking(false);
+    });
     return () => subscription.unsubscribe();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!ready) return;
     if (password !== confirm) { toast.error("Passwords do not match."); return; }
     setLoading(true);
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
+      sessionStorage.removeItem("zebra-password-recovery");
+      await supabase.auth.signOut();
       toast.success("Password updated. You can sign in with your new password now.");
-      navigate("/expert/login", { replace: true });
+      navigate(loginPath(portal), { replace: true });
     } catch (err: any) { toast.error(err.message); }
     finally { setLoading(false); }
   };
@@ -64,9 +79,10 @@ export default function ResetPassword() {
             </Button>
           </form>
         ) : (
-          <p className="text-center text-sm text-muted-foreground font-mono">
-            Verifying your reset link… If this takes too long, request a new link from the sign-in page.
-          </p>
+          <div className="text-center space-y-4">
+            <p className="text-sm text-muted-foreground font-mono">{checking ? "Verifying your reset link…" : "This reset link is invalid, expired, or already used. Request a new email from the sign-in page."}</p>
+            {!checking && <Button onClick={() => navigate(loginPath(portal))}>Back to sign in</Button>}
+          </div>
         )}
       </div>
     </div>

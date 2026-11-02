@@ -29,6 +29,7 @@ import AdminBookings from "./pages/admin/AdminBookings";
 import KnowledgeBasePage from "./pages/admin/KnowledgeBasePage";
 import ExpertLogin from "./pages/ExpertLogin";
 import ResetPassword from "./pages/ResetPassword";
+import AuthCallback from "./pages/AuthCallback";
 import ExpertLayout from "./pages/expert/ExpertLayout";
 import ExpertDashboard from "./pages/expert/ExpertDashboard";
 import ExpertBookings from "./pages/expert/ExpertBookings";
@@ -55,6 +56,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/expertise" element={<Expertise />} />
           <Route path="/about" element={<About />} />

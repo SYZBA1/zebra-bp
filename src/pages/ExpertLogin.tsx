@@ -7,6 +7,8 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowLeft, Briefcase } from "lucide-react";
+import AuthEmailActions from "@/components/AuthEmailActions";
+import { emailReturnUrl } from "@/lib/auth-flow";
 
 export default function ExpertLogin() {
   const [isLogin, setIsLogin] = useState(true);
@@ -33,19 +35,6 @@ export default function ExpertLogin() {
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!email) { toast.error("Enter your email address first, then click Forgot password."); return; }
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      if (error) throw error;
-      toast.success("Password reset email sent. Check your inbox and follow the link.");
-    } catch (err: any) { toast.error(err.message); }
-    finally { setLoading(false); }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -55,11 +44,11 @@ export default function ExpertLogin() {
         if (error) throw error;
         if (data.user) await goExpertHome(data.user.id);
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data: signup, error } = await supabase.auth.signUp({
           email, password,
           options: {
             data: { display_name: name, expert_application: { industry } },
-            emailRedirectTo: `${window.location.origin}/expert`,
+            emailRedirectTo: emailReturnUrl("expert"),
           },
         });
         // A duplicate account still records the application; the person then signs in and it links by email.
@@ -68,7 +57,7 @@ export default function ExpertLogin() {
           _name: name, _industry: industry, _email: email,
         });
         if (applyErr) throw applyErr;
-        toast.success("Application received. An admin will review it under Consultants.");
+        toast.success(signup.session ? "Application received. An admin must approve your expert access before you sign in here." : "Application received. Check your email to confirm your account. An admin must also approve your expert access.", { duration: 8000 });
         setIsLogin(true);
       }
     } catch (err: any) { toast.error(err.message); }
@@ -113,12 +102,6 @@ export default function ExpertLogin() {
           <div>
             <div className="flex items-center justify-between">
               <Label className="text-xs">Password</Label>
-              {isLogin && (
-                <button type="button" onClick={handleForgotPassword}
-                  className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 font-mono">
-                  Forgot password?
-                </button>
-              )}
             </div>
             <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
           </div>
@@ -126,6 +109,7 @@ export default function ExpertLogin() {
             {loading ? "Loading…" : isLogin ? "Sign In" : "Submit Application"}
           </Button>
         </form>
+        {isLogin && <AuthEmailActions email={email} portal="expert" />}
 
         <p className="text-center text-sm text-muted-foreground mt-6 font-mono">
           {isLogin ? "Want to join as an expert?" : "Already approved?"}{" "}

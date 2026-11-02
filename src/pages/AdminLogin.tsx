@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Shield, Loader2 } from "lucide-react";
+import AuthEmailActions from "@/components/AuthEmailActions";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -16,12 +17,12 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (user) {
         const { data } = await supabase
           .from("user_roles")
           .select("role")
-          .eq("user_id", session.user.id)
+          .eq("user_id", user.id)
           .eq("role", "admin")
           .maybeSingle();
         if (data) navigate("/admin", { replace: true });
@@ -100,6 +101,7 @@ const AdminLogin = () => {
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
           </Button>
         </form>
+        <AuthEmailActions email={email} portal="admin" />
         <p className="text-xs text-muted-foreground text-center font-mono">
           Non-admin users will be signed out automatically.
         </p>
